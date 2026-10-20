@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScanStock OS × Tsukihana 月花 · 09 App de Inventario con Escáner, Etiquetas APPCC e Integración en Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #fdf8fc;
+    --bg-card: #ffffff;
+    --bg-lavender: #f6f0ff;
+    --purple-950: #17072b;
+    --purple-900: #240a3d;
+    --purple-800: #3b0d63;
+    --purple-700: #5b21b6;
+    --purple-600: #6d28d9;
+    --purple-100: #ede9fe;
+    --fuchsia-600: #db2777;
+    --fuchsia-500: #ec4899;
+    --pink-100: #fce7f3;
+    --pink-50: #fdf2f8;
+    --grad-brand: linear-gradient(135deg, #240a3d 0%, #6d28d9 52%, #db2777 100%);
+    --grad-cta: linear-gradient(135deg, #db2777 0%, #7e22ce 100%);
+    --grad-scanner: linear-gradient(145deg, #120524 0%, #260b47 55%, #471054 100%);
+    --ink: #1b0c29;
+    --muted: #645375;
+    --border: rgba(109, 40, 217, 0.15);
+    --pink-border: rgba(219, 39, 119, 0.24);
+    --shadow-soft: 0 12px 32px rgba(36, 10, 61, 0.07);
+    --shadow-strong: 0 20px 48px rgba(23, 7, 43, 0.22);
+    --ok-bg: #dcfce7; --ok-txt: #14532d; --ok-dot: #10b981;
+    --warn-bg: #fef3c7; --warn-txt: #92400e; --warn-dot: #f59e0b;
+    --bad-bg: #fee2e2; --bad-txt: #991b1b; --bad-dot: #ef4444;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background:
+      radial-gradient(circle at 10% 10%, rgba(236, 72, 153, 0.09) 0%, transparent 38%),
+      radial-gradient(circle at 90% 85%, rgba(109, 40, 217, 0.09) 0%, transparent 40%),
+      var(--bg-page);
+    color: var(--ink);
+    padding: 16px 20px 60px;
+    line-height: 1.5;
+  }
+
+  /* BARRA DE NAVEGACIÓN SUITE TSUKIHANA */
+  .top-nav {
+    background: var(--purple-950);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    border-bottom: 2px solid var(--fuchsia-600);
+  }
+  .tool-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tool-links a {
+    color: #fbcfe8;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-weight: 700;
+    transition: 0.18s;
+  }
+  .tool-links a.active, .tool-links a:hover {
+    background: var(--fuchsia-600);
+    color: #fff;
+    border-color: var(--fuchsia-500);
+  }
+
+  /* HERO BANNER DE LA APP + SELECTOR DE VISTA */
+  .hero-header {
+    background: var(--grad-brand);
+    color: #fff;
+    border-radius: 24px;
+    padding: 24px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 16px 38px rgba(109, 40, 217, 0.22);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-header::after {
+    content: '月花';
+    position: absolute;
+    right: 18px;
+    bottom: -26px;
+    font-family: var(--font-serif);
+    font-size: 130px;
+    color: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .app-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(255,255,255,0.16);
+    color: #fbcfe8;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .pill-tag.live {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #34d399;
+    color: #a7f3d0;
+  }
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    display: inline-block;
+  }
+  .hero-header h1 {
+    font-family: var(--font-serif);
+    font-size: 31px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 5px;
+  }
+  .hero-header p {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.9);
+    max-width: 720px;
+  }
+
+  .layout-switcher {
+    background: rgba(15, 5, 29, 0.45);
+    padding: 5px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    z-index: 2;
+  }
+  .layout-btn {
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #f3e8ff;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.18s;
+  }
+  .layout-btn.active {
+    background: #fff;
+    color: var(--purple-900);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+
+  /* BARRA DE PRUEBA RÁPIDA Y MÓDULOS */
+  .quick-bar {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: var(--shadow-soft);
+  }
+  .quick-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mod-tab-btn {
+    padding: 8px 14px;
+    border-radius: 11px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-page);
+    color: var(--purple-900);
+    font-weight: 800;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: 0.18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mod-tab-btn:hover {
+    border-color: var(--fuchsia-500);
+    background: var(--pink-50);
+  }
+  .mod-tab-btn.active {
+    background: var(--grad-cta);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 16px rgba(219, 39, 119, 0.28);
+  }
+  .mod-badge-cnt {
+    background: rgba(255,255,255,0.25);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 10.5px;
+  }
+
+  /* KPIs EN TIEMPO REAL */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .kpi-box {
+    background: #fff;
+    border: 1px solid var(--pink-border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-box::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--grad-cta);
+  }
+  .kpi-box .k-val {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--purple-900);
+  }
+  .kpi-box .k-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+  .kpi-box .k-sub {
+    font-size: 11px;
+    color: var(--fuchsia-600);
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  /* WORKSPACE DUAL: IZQUIERDA (APP SCANSTOCK) + DERECHA (INTEGRACIÓN TSUKIHANA EN VIVO) */
+  .main-stage {
+    display: grid;
+    grid-template-columns: 1.22fr 0.78fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .main-stage.single-app {
+    grid-template-columns: 1fr;
+  }
+  .main-stage.single-tsuki {
+    grid-template-columns: 1fr;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .panel-card {
+    background: #fff;
+    border-radius: 22px;
+    border: 1.5px solid var(--border);
+    padding: 22px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 18px;
+  }
+
+  .app-module { display: none; animation: fadeIn 0.2s ease; }
+  .app-module.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* =========================================================
+     MÓDULO 1: TERMINAL LECTOR LÁSER / CÁMARA / BÁSCULA
+     ========================================================= */
+  .scanner-terminal {
+    background: var(--grad-scanner);
+    color: #fff;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: var(--shadow-strong);
+    border: 1.5px solid rgba(236, 72, 153, 0.4);
+    margin-bottom: 18px;
+  }
+  .scanner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .dir-pills {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    flex-wrap: wrap;
+  }
+  .dir-btn {
+    padding: 7px 12px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: #e9d5ff;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .dir-btn.active.out { background: #db2777; color: #fff; }
+  .dir-btn.active.in { background: #059669; color: #fff; }
+  .dir-btn.active.waste { background: #d97706; color: #fff; }
+
+  .laser-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .laser-input {
+    flex: 1;
+    min-width: 230px;
+    padding: 13px 16px;
+    border-radius: 13px;
+    border: 2px solid var(--fuchsia-500);
+    background: rgba(255,255,255,0.97);
+    color: var(--purple-950);
+    font-family: var(--font-mono);
+    font-size: 14.5px;
+    font-weight: 800;
+    outline: none;
+  }
+  .laser-input:focus {
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.35);
+  }
+
+  .btn {
+    padding: 10px 16px;
+    border-radius: 11px;
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: 0.18s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn.pink {
+    background: var(--grad-cta);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.32);
+  }
+  .btn.pink:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn.ghost {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.24);
+  }
+  .btn.ghost:hover { background: rgba(255,255,255,0.22); }
+  .btn.light {
+    background: var(--pink-50);
+    color: var(--fuchsia-600);
+    border: 1px solid var(--pink-border);
+  }
+  .btn.light:hover { background: var(--fuchsia-600); color: #fff; }
+  .btn.whatsapp {
+    background: #16a34a;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+  }
+
+  /* CÁMARA EN VIVO */
+  .camera-drawer {
+    display: none;
+    background: #090312;
+    border: 2px solid var(--fuchsia-500);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .camera-drawer.open { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: center; }
+  .cam-viewport {
+    height: 155px;
+    background: #000;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .cam-viewport video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.78;
+  }
+  .laser-beam {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 2.5px;
+    background: #ef4444;
+    box-shadow: 0 0 12px #ef4444, 0 0 24px #ec4899;
+    animation: scanBeam 1.5s infinite alternate ease-in-out;
+  }
+  @keyframes scanBeam {
+    0% { top: 15%; }
+    100% { top: 85%; }
+  }
+
+  /* TARJETAS DE CÓDIGOS DE BARRAS CLICABLES */
+  .bc-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .bc-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bc-tab {
+    padding: 5px 11px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fbcfe8;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .bc-tab.active {
+    background: #fff;
+    color: var(--purple-950);
+  }
+
+  .bc-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+  .bc-card {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 13px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: 0.16s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .bc-card:hover {
+    background: rgba(236, 72, 153, 0.28);
+    border-color: #f472b6;
+    transform: translateY(-2px);
+  }
+  .bc-card.dish-card {
+    background: rgba(219, 39, 119, 0.16);
+    border-color: rgba(244, 114, 182, 0.38);
+  }
+  .bc-card.custom-card {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: rgba(52, 211, 153, 0.45);
+  }
+  .bc-visual-code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 1.5px;
+    color: #fbcfe8;
+    background: rgba(0,0,0,0.35);
+    padding: 3px 7px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+  .bc-card strong {
+    font-size: 12.5px;
+    color: #fff;
+    display: block;
+    line-height: 1.25;
+  }
+  .bc-card small {
+    font-size: 11px;
+    color: #e9d5ff;
+    display: block;
+    margin-top: 2px;
+  }
+  .bc-card-foot {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 800;
+    color: #f9a8d4;
+  }
+
+  /* BÁSCULA DINÁMICA RÁPIDA */
+  .scale-bar {
+    background: rgba(0,0,0,0.28);
+    border: 1px dashed rgba(249, 168, 212, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .scale-bar select, .scale-bar input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--purple-950);
+  }
+
+  /* HISTORIAL EN VIVO DE LECTURAS */
+  .scan-log-panel {
+    background: #120621;
+    color: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+  .scan-log-list {
+    max-height: 195px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+  }
+  .log-entry {
+    background: rgba(255,255,255,0.06);
+    border-left: 3.5px solid #10b981;
+    padding: 8px 11px;
+    border-radius: 8px;
+    font-size: 11.8px;
+  }
+  .log-entry.err { border-left-color: #ef4444; }
+  .log-entry.warn { border-left-color: #f59e0b; }
+
+  /* =========================================================
+     MÓDULO 2: GENERADOR DE ETIQUETAS Y TRAZABILIDAD APPCC
+     ========================================================= */
+  .label-studio-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--purple-900);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    background: #fff;
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* ETIQUETA TÉRMICA REALISTA */
+  .thermal-label-preview {
+    background: #fff;
+    border: 2px solid #1b0c29;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 14px 30px rgba(27, 12, 41, 0.12);
+    color: #000;
+    position: relative;
+  }
+  .thermal-top {
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .thermal-top strong {
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+  .thermal-top span {
+    font-size: 10px;
+    font-weight: 800;
+    background: #000;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .thermal-prod-title {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .thermal-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 11px;
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+    padding: 8px 0;
+    margin-bottom: 10px;
+  }
+  .thermal-barcode-box {
+    text-align: center;
+    padding: 6px 0 2px;
+  }
+
+  /* =========================================================
+     MÓDULO 3 & COLUMNA DERECHA: TSUKIHANA EN VIVO (CARTA + RESÉRVALO)
+     ========================================================= */
+  .live-tsuki-panel {
+    background: #fff;
+    border-radius: 22px;
+    border: 2px solid var(--pink-border);
+    padding: 20px;
+    box-shadow: var(--shadow-soft);
+    position: sticky;
+    top: 16px;
+  }
+  .sync-banner {
+    background: var(--pink-50);
+    border: 1px solid var(--pink-border);
+    border-radius: 14px;
+    padding: 10px 13px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .dish-sync-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 16px;
+  }
+  .dish-sync-card {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 11px 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    transition: 0.2s;
+  }
+  .dish-sync-card.soldout {
+    background: #fef2f2;
+    border-color: #fca5a5;
+  }
+  .dish-sync-card.low {
+    background: #fffbeb;
+    border-color: #fcd34d;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 99px;
+    font-size: 10.5px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .st-ok { background: var(--ok-bg); color: var(--ok-txt); }
+  .st-warn { background: var(--warn-bg); color: var(--warn-txt); }
+  .st-bad { background: var(--bad-bg); color: var(--bad-txt); }
+
+  /* TABLA COMPACTA DE STOCK */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: var(--purple-900);
+    color: #fff;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--pink-50); }
+
+  /* PROVEEDORES Y ALERTAS WHATSAPP */
+  .supplier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .supplier-card {
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .supplier-card.needs-order {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+  .supplier-card.urgent-order {
+    border-color: #ef4444;
+    background: #fef2f2;
+  }
+  .wa-preview-box {
+    background: #dcfce7;
+    color: #14532d;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 11.5px;
+    font-family: var(--font-sans);
+    border: 1px solid #86efac;
+  }
+
+  /* MODAL DE IMPRESIÓN / WHATSAPP */
+  .toast-banner {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    background: var(--purple-950);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 2px solid var(--fuchsia-500);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.32);
+    z-index: 999;
+    max-width: 390px;
+    transform: translateY(140%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .toast-banner.show { transform: translateY(0); }
+
+  @media (max-width: 1024px) {
+    .main-stage, .label-studio-grid, .camera-drawer.open { grid-template-columns: 1fr; }
+    .live-tsuki-panel { position: static; }
+  }
+  @media print {
+    .top-nav, .hero-header, .quick-bar, .kpi-strip, .live-tsuki-panel, .no-print { display: none !important; }
+    body { background: #fff; padding: 0; }
+    .main-stage { grid-template-columns: 1fr; }
+    .thermal-label-preview { border: 2px solid #000; box-shadow: none; max-width: 340px; margin: 20px auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BARRA DE NAVEGACIÓN DE LA SUITE OPERATIVA TSUKIHANA -->
+<div class="top-nav">
+  <div><strong>SCANSTOCK OS × TSUKIHANA · 09</strong> · Aplicación de Inventario con Escáner Láser/Cámara, Etiquetas APPCC y Sincronización Carta (Piloto #01 Oficial de <strong style="color:#a3e635;">Pítalo</strong>)</div>
+  <div class="tool-links">
+    <a href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a href="index.html">🌸 Web Clientes</a> 
+    <a href="01_Vista_Previa_Interactiva_Tsukihana.html">🌸 01 Home</a>
+    <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">📖 05 Carta</a>
+    <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">⚖️ 06 Inventario</a>
+    <a href="07_Integracion_Reservalo_x_Tsukihana_Maqueta.html">🔗 07 Resérvalo</a>
+    <a href="08_App_Movil_Tsukihana_Maqueta.html">📱 08 App Móvil</a>
+    <a class="active" href="09_App_Escaneado_Inventario_x_Tsukihana.html">🔫 09 App Escáner Stock</a>
+    <a href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html">🧮 02 Escandallos</a>
+    <a href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">📄 03 Dossier</a>
+    <a style="background:linear-gradient(135deg,#10b981,#a3e635);color:#070d19;font-weight:800;border:none;" href="../Pitalo_App_Independiente/01_Pitalo_App_Universal_MultiSector.html">⚡ Pítalo App Universal</a>
+    <a style="background:rgba(16,185,129,0.2);border:1px solid #10b981;color:#a7f3d0;" href="../Pitalo_App_Independiente/02_Pitalo_Landing_Comercial_y_Piloto_Tsukihana.html">🚀 Web pitalo.es</a>
+  </div>
+</div>
+
+<!-- CABECERA PRINCIPAL CON SELECTOR DE VISTA -->
+<header class="hero-header">
+  <div>
+    <div class="app-badge-row">
+      <span class="pill-tag live"><span class="pulse-dot"></span> ScanStock OS v2.4 · Conectado a Tsukihana & Resérvalo</span>
+      <span class="pill-tag">🔫 HID USB/Bluetooth + Cámara Web/Móvil + APPCC</span>
+    </div>
+    <h1>ScanStock OS × Tsukihana (月花)</h1>
+    <p>Aplicación integral de control de stock por código de barras y gramaje: escanea entradas/salidas, imprime etiquetas sanitarias APPCC, bloquea platos agotados en la Carta automáticamente y pide a proveedores por WhatsApp en 1 clic.</p>
+  </div>
+
+  <div class="layout-switcher">
+    <button class="layout-btn active" onclick="setStageLayout('both', this)">🔀 Vista Integrada (App + Tsukihana)</button>
+    <button class="layout-btn" onclick="setStageLayout('app', this)">🔫 Solo App ScanStock</button>
+    <button class="layout-btn" onclick="setStageLayout('tsuki', this)">🌸 Solo Carta & Resérvalo</button>
+  </div>
+</header>
+
+<!-- BARRA DE MÓDULOS DE LA APLICACIÓN + ACCIONES RÁPIDAS -->
+<div class="quick-bar">
+  <div class="quick-bar-left">
+    <button class="mod-tab-btn active" id="tab-btn-scanner" onclick="switchAppModule('scanner')">
+      🔫 1. Terminal Escáner & Stock
+    </button>
+    <button class="mod-tab-btn" id="tab-btn-labels" onclick="switchAppModule('labels')">
+      🏷️ 2. Etiquetas & Trazabilidad APPCC
+    </button>
+    <button class="mod-tab-btn" id="tab-btn-suppliers" onclick="switchAppModule('suppliers')">
+      🚚 3. Proveedores WhatsApp & Mermas <span class="mod-badge-cnt" id="supplierAlertBadge">0</span>
+    </button>
+    <button class="mod-tab-btn" id="tab-btn-api" onclick="switchAppModule('api')">
+      🔌 4. Arquitectura & Integración
+    </button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn light" onclick="simulateDepleteSalmon()">⚡ Simular Fin de Salmón (Ver Bloqueo Carta)</button>
+    <button class="btn light" onclick="resetAllStock()">↺ Restaurar Stock Inicial</button>
+  </div>
+</div>
+
+<!-- TIRA DE KPIs EN TIEMPO REAL -->
+<div class="kpi-strip">
+  <div class="kpi-box">
+    <div class="k-val" id="kpiTotalFish">0 g</div>
+    <div class="k-lbl">Pescado Limpio en Cámara</div>
+    <div class="k-sub" id="kpiFishSub">5 referencias activas</div>
+  </div>
+  <div class="kpi-box">
+    <div class="k-val" id="kpiActiveDishes">10 / 10</div>
+    <div class="k-lbl">Platos Disponibles en Carta</div>
+    <div class="k-sub" id="kpiDishesSub">Sincronizado con Web & App</div>
+  </div>
+  <div class="kpi-box">
+    <div class="k-val" id="kpiScansCount">0</div>
+    <div class="k-lbl">Lecturas de Escáner Hoy</div>
+    <div class="k-sub" id="kpiLastScanCode">Listo para pitar</div>
+  </div>
+  <div class="kpi-box">
+    <div class="k-val" id="kpiLowAlerts">0</div>
+    <div class="k-lbl">Alertas a Proveedores</div>
+    <div class="k-sub" id="kpiLowSub">Reposición automática</div>
+  </div>
+  <div class="kpi-box">
+    <div class="k-val" id="kpiInventoryEur">0,00 €</div>
+    <div class="k-lbl">Valor Actual del Stock</div>
+    <div class="k-sub" id="kpiWasteEur">Merma hoy: 0,00 €</div>
+  </div>
+</div>
+
+<!-- ESCENARIO PRINCIPAL: IZQUIERDA (APP SCANSTOCK OS) + DERECHA (TSUKIHANA LIVE SYNC) -->
+<main class="main-stage" id="mainStage">
+
+  <!-- =====================================================================
+       COLUMNA IZQUIERDA: APLICACIÓN SCANSTOCK OS (4 MÓDULOS)
+       ===================================================================== -->
+  <div id="colApp">
+
+    <!-- -------------------------------------------------------------------
+         MÓDULO 1: TERMINAL ESCÁNER LÁSER / CÁMARA + TABLA DE INVENTARIO
+         ------------------------------------------------------------------- -->
+    <div class="app-module active" id="mod-scanner">
+      <div class="scanner-terminal">
+        <div class="scanner-header">
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#f9a8d4;text-transform:uppercase;letter-spacing:0.06em;">
+              🔫 Terminal de Lectura Óptica y Láser · Modo Dual Activo
+            </div>
+            <h2 style="font-family:var(--font-serif);font-size:24px;font-weight:700;">
+              Escáner de Lotes (Modo 1), Recetas (Modo 2) y Báscula
+            </h2>
+          </div>
+
+          <!-- Selector Salida / Entrada / Merma -->
+          <div class="dir-pills">
+            <button class="dir-btn active out" id="dirOutBtn" onclick="setScanMode('out')">📤 SALIDA (- Stock)</button>
+            <button class="dir-btn in" id="dirInBtn" onclick="setScanMode('in')">📥 ENTRADA (+ Stock)</button>
+            <button class="dir-btn waste" id="dirWasteBtn" onclick="setScanMode('waste')">🗑️ MERMA (- Baja)</button>
+          </div>
+        </div>
+
+        <!-- Barra de input para pistola láser USB/Bluetooth + Botón Cámara -->
+        <div class="laser-input-row">
+          <input type="text" id="laserBarcodeInput" class="laser-input"
+                 placeholder="🔫 Pita con pistola USB/Bluetooth o escribe código (ej. 841001, 990016, 2010350)..."
+                 onkeydown="if(event.key==='Enter') executeBarcodeScan(this.value)">
+          <button class="btn pink" onclick="executeBarcodeScan(document.getElementById('laserBarcodeInput').value)">
+            ⚡ Procesar Lectura
+          </button>
+          <button class="btn ghost" onclick="toggleCameraDrawer()">
+            📷 Cámara en Vivo
+          </button>
+          <button class="btn ghost" onclick="undoLastBarcodeScan()" title="Revertir última lectura">
+            ↩️ Deshacer
+          </button>
+        </div>
+
+        <!-- Visor de Cámara Web / Móvil Real + Detector -->
+        <div class="camera-drawer" id="cameraDrawer">
+          <div class="cam-viewport">
+            <video id="liveScannerVideo" autoplay playsinline muted></video>
+            <div class="laser-beam"></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong style="font-size:13.5px;color:#fbcfe8;">📷 Escáner Óptico por Cámara (Móvil / Webcam)</strong>
+              <span id="camDetectorStatus" style="font-size:10.5px;background:rgba(16,185,129,0.2);color:#a7f3d0;padding:2px 8px;border-radius:99px;font-weight:800;">Activo</span>
+            </div>
+            <p style="font-size:12px;color:#e9d5ff;margin-bottom:10px;">
+              Enfoca cualquier etiqueta EAN-13 / Code-128 frente a la cámara o pulsa uno de los botones de simulación rápida:
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn pink" style="padding:7px 12px;font-size:11.5px;" onclick="simulateCameraDetection('raw')">
+                📸 Detectar Lote Pescado (Azar)
+              </button>
+              <button class="btn ghost" style="padding:7px 12px;font-size:11.5px;" onclick="simulateCameraDetection('dish')">
+                🍱 Detectar Caja Saliente (Azar)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros de tarjetas de código de barras -->
+        <div class="bc-filter-bar">
+          <span style="font-size:12px;font-weight:800;color:#fbcfe8;">
+            👇 Haz clic en cualquier etiqueta para disparar el lector al instante:
+          </span>
+          <div class="bc-tabs">
+            <button class="bc-tab active" onclick="filterCatalogCards('all', this)">Todos los Códigos</button>
+            <button class="bc-tab" onclick="filterCatalogCards('raw', this)">🐟 Modo 1: Lotes / Cámara</button>
+            <button class="bc-tab" onclick="filterCatalogCards('dish', this)">🍱 Modo 2: Cajas / Recetas</button>
+            <button class="bc-tab" onclick="filterCatalogCards('custom', this)">🏷️ Mis Etiquetas APPCC</button>
+          </div>
+        </div>
+
+        <!-- Grid de tarjetas de códigos de barras -->
+        <div class="bc-cards-grid" id="barcodeCardsGrid"></div>
+
+        <!-- Simulador de Etiqueta Dinámica de Báscula (20XXXXX) -->
+        <div class="scale-bar">
+          <div>
+            <strong style="color:#fbcfe8;">⚖️ Modo 3 · Lector de Código Dinámico de Báscula (Prefijo 20):</strong>
+            <span style="color:#e9d5ff;font-size:11.5px;margin-left:4px;">Codifica el peso exacto del lomo en el código de barras</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <select id="scaleFishSelect" onchange="updateDynamicScaleCode()">
+              <option value="1">1 · Salmón Noruego</option>
+              <option value="2">2 · Atún Rojo Balfegó</option>
+              <option value="3">3 · Pez Mantequilla</option>
+              <option value="4">4 · Vieira Gallega</option>
+              <option value="5">5 · Aguacate Pulpa</option>
+            </select>
+            <input type="number" id="scaleGramsInput" value="340" min="10" max="9999" step="10" style="width:82px;" oninput="updateDynamicScaleCode()">
+            <span style="font-weight:800;color:#fbcfe8;">g →</span>
+            <button class="btn pink" style="padding:7px 12px;font-size:11.5px;" id="scaleTriggerBtn" onclick="triggerScaleBarcode()">
+              🔫 Pitar 2010340
+            </button>
+          </div>
+        </div>
+
+        <!-- Registro de lecturas en vivo -->
+        <div class="scan-log-panel" style="margin-top:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:12.5px;color:#fbcfe8;">📡 Historial de Lecturas del Turno en Tiempo Real</strong>
+            <span style="font-size:11px;color:#d8b4fe;">🔊 Bip acústico activo · Sincronizado con Tsukihana</span>
+          </div>
+          <div class="scan-log-list" id="liveScanLog"></div>
+        </div>
+      </div>
+
+      <!-- Tabla Editable de Inventario Disponible Conectada -->
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--purple-900);">❄️ Inventario en Tiempo Real por Gramaje y Envases</h3>
+            <p style="font-size:12.5px;color:var(--muted);">Cada lectura del escáner actualiza esta tabla y recalcula al instante qué platos pueden venderse en Tsukihana.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="stockSearchInput" class="form-input" placeholder="🔍 Filtrar ingrediente..." style="width:190px;padding:7px 11px;" oninput="renderInventoryTable()">
+            <button class="btn light" onclick="exportStockCSV()">⬇️ Exportar CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ingrediente / Lote</th>
+                <th>Familia</th>
+                <th>Stock Actual</th>
+                <th>Ajuste Manual</th>
+                <th>Mínimo Alerta</th>
+                <th>Valor Stock</th>
+                <th>Estado / Impacto</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- -------------------------------------------------------------------
+         MÓDULO 2: GENERADOR E IMPRESOR DE ETIQUETAS + TRAZABILIDAD APPCC
+         ------------------------------------------------------------------- -->
+    <div class="app-module" id="mod-labels">
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <div>
+            <span class="status-pill st-ok" style="margin-bottom:6px;">🏷️ Normativa Sanitaria Europea & APPCC Sushi</span>
+            <h2 style="font-family:var(--font-serif);font-size:26px;color:var(--purple-900);">
+              Generador e Impresor de Etiquetas con Código de Barras
+            </h2>
+            <p style="font-size:13px;color:var(--muted);">
+              Crea etiquetas térmicas para bloques de pescado (Saku), arroz o cajas terminadas con fecha de congelación Anisakis, caducidad y código de barras listo para pitar.
+            </p>
+          </div>
+        </div>
+
+        <div class="label-studio-grid">
+          <!-- Formulario de creación de etiqueta -->
+          <div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Tipo de Etiqueta</label>
+                <select id="lblMode" class="form-select" onchange="onLabelFormChange()">
+                  <option value="raw">🐟 Modo 1: Lote Materia Prima / Cámara</option>
+                  <option value="dish">🍱 Modo 2: Caja Terminada / Delivery</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Ingrediente / Plato Vinculado</label>
+                <select id="lblTargetId" class="form-select" onchange="onLabelTargetChange()"></select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Nombre en la Etiqueta</label>
+                <input type="text" id="lblCustomTitle" class="form-input" value="Saku Salmón Noruego Superior" oninput="renderThermalLabelPreview()">
+              </div>
+              <div class="form-group">
+                <label>Peso Neto / Cantidad</label>
+                <input type="number" id="lblAmount" class="form-input" value="250" min="1" step="10" oninput="renderThermalLabelPreview()">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Código de Barras (EAN / Interno)</label>
+                <div style="display:flex;gap:6px;">
+                  <input type="text" id="lblBarcode" class="form-input" value="841025" oninput="renderThermalLabelPreview()">
+                  <button class="btn light" style="padding:8px 10px;" onclick="generateNewRandomBarcode()" title="Generar nuevo código">🎲</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Nº Lote Sanitario (APPCC)</label>
+                <input type="text" id="lblLotNumber" class="form-input" value="LOT-261017-SAL01" oninput="renderThermalLabelPreview()">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Proveedor / Trazabilidad Origen</label>
+                <input type="text" id="lblSupplier" class="form-input" value="Lonja de Vigo · Atlántico Norte" oninput="renderThermalLabelPreview()">
+              </div>
+              <div class="form-group">
+                <label>Régimen Térmico / Anisakis</label>
+                <select id="lblTemp" class="form-select" onchange="renderThermalLabelPreview()">
+                  <option value="❄️ Ultracongelado -60°C (Anisakis OK)">❄️ Ultracongelado -60°C (Anisakis OK)</option>
+                  <option value="🧊 Congelado -20°C >48h (Anisakis OK)">🧊 Congelado -20°C >48h (Anisakis OK)</option>
+                  <option value="🌡️ Cámara 0°C a 2°C · Consumo 48h">🌡️ Cámara 0°C a 2°C · Consumo 48h</option>
+                  <option value="🌾 Almacén Seco Hermético">🌾 Almacén Seco Hermético</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Fecha Elaboración / Congelación</label>
+                <input type="date" id="lblDateProd" class="form-input" value="2026-10-17" onchange="renderThermalLabelPreview()">
+              </div>
+              <div class="form-group">
+                <label>Fecha Caducidad Lote</label>
+                <input type="date" id="lblDateExp" class="form-input" value="2026-10-20" onchange="renderThermalLabelPreview()">
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+              <button class="btn pink" onclick="saveLabelAndAddStock()">
+                ➕ Registrar Etiqueta en Escáner y Sumar Lote al Stock
+              </button>
+              <button class="btn light" onclick="window.print()">
+                🖨️ Imprimir Etiqueta Térmica / PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Vista Previa Realista de Etiqueta Térmica -->
+          <div>
+            <div style="font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">
+              👁️ Vista Previa en Vivo · Etiqueta Térmica Adhesiva (58×40 mm)
+            </div>
+            <div class="thermal-label-preview" id="thermalLabelBox">
+              <div class="thermal-top">
+                <strong>TSUKIHANA 月花 · VIGO</strong>
+                <span id="prevModeTag">APPCC LOTE</span>
+              </div>
+              <div class="thermal-prod-title" id="prevTitle">Saku Salmón Noruego Superior</div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+                <span style="font-size:11px;font-weight:700;" id="prevSupplier">Origen: Lonja de Vigo · Atlántico Norte</span>
+                <strong style="font-family:var(--font-mono);font-size:18px;background:#000;color:#fff;padding:2px 8px;border-radius:6px;" id="prevWeight">250 g</strong>
+              </div>
+              <div class="thermal-meta-grid">
+                <div><strong>LOTE:</strong> <span id="prevLot">LOT-261017-SAL01</span></div>
+                <div><strong>PROD:</strong> <span id="prevProdDate">17/10/2026</span></div>
+                <div style="grid-column:1/-1;"><strong>CONSERVACIÓN:</strong> <span id="prevTemp">❄️ Ultracongelado -60°C (Anisakis OK)</span></div>
+                <div style="grid-column:1/-1;color:#991b1b;font-weight:800;"><strong>CADUCIDAD LÍMITE:</strong> <span id="prevExpDate">20/10/2026 · 23:59h</span></div>
+              </div>
+              <div class="thermal-barcode-box">
+                <svg id="barcodeSvg" width="100%" height="58" viewBox="0 0 260 58"></svg>
+                <div style="font-family:var(--font-mono);font-size:13px;font-weight:800;letter-spacing:3px;margin-top:2px;" id="prevCodeText">841025</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;background:var(--bg-lavender);border-radius:12px;padding:12px;font-size:12px;color:var(--purple-900);">
+              💡 <strong>Flujo en Cocina:</strong> Al recibir el pescado de la lonja, lo limpias en sakus, imprimes esta pegatina y la pegas en la bolsa al vacío. Cuando el chef la saca de la nevera para el turno de noche, la pita con el lector y se descuentan los gramos automáticamente.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pliego A4 de 12 Etiquetas Listas para Imprimir y Recortar/Pegar -->
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--purple-900);">📄 Pliego A4 de 12 Etiquetas Oficiales (Lotes de Cámara + Cajas Delivery)</h3>
+            <p style="font-size:12.5px;color:var(--muted);">Hoja lista para imprimir en papel adhesivo A4 o plastificar junto a la balanza para pitar en 1 segundo con la pistola láser:</p>
+          </div>
+          <button class="btn pink" onclick="window.print()">🖨️ Imprimir Pliego Completo de Códigos</button>
+        </div>
+        <div id="a4StickerSheetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- -------------------------------------------------------------------
+         MÓDULO 3: PROVEEDORES AUTOMÁTICOS WHATSAPP + CONTROL DE MERMAS
+         ------------------------------------------------------------------- -->
+    <div class="app-module" id="mod-suppliers">
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div>
+            <span class="status-pill st-warn" style="margin-bottom:6px;">🚚 Reposición Inteligente B2B & Control de Mermas</span>
+            <h2 style="font-family:var(--font-serif);font-size:26px;color:var(--purple-900);">
+              Pedidos a Proveedores en 1 Clic (WhatsApp / Email)
+            </h2>
+            <p style="font-size:13px;color:var(--muted);">
+              Cuando el escáner detecta que un ingrediente baja del stock mínimo de seguridad, ScanStock redacta automáticamente el pedido al proveedor asignado.
+            </p>
+          </div>
+          <button class="btn pink" onclick="replenishAllLowStock()">
+            📥 Recibir Todos los Pedidos Pendientes (+ Rellenar Stock)
+          </button>
+        </div>
+
+        <div class="supplier-grid" id="suppliersGrid"></div>
+      </div>
+
+      <!-- Registro de Mermas y Calculadora de Rendimiento de Limpieza -->
+      <div class="panel-card">
+        <h3 style="font-size:17px;font-weight:800;color:var(--purple-900);margin-bottom:6px;">
+          🔪 Calculadora de Entrada de Lonja (Merma de Limpieza a Lomo Saku)
+        </h3>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">
+          Convierte la pieza entera comprada al proveedor en gramos netos de lomo limpio y súmalos directamente al inventario:
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end;">
+          <div>
+            <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">Pescado / Materia Prima</label>
+            <select id="yieldIngSelect" class="form-select" onchange="updateYieldCalc()">
+              <option value="salmon" data-yield="62">🐟 Salmón Noruego Entero (62% rend.)</option>
+              <option value="atun" data-yield="78">🍣 Atún Rojo Bloque (78% rend.)</option>
+              <option value="butterfish" data-yield="82">🐡 Pez Mantequilla Lomo (82% rend.)</option>
+              <option value="aguacate" data-yield="68">🥑 Aguacate Hass Caja (68% pulpa)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">Peso Bruto Comprado (g)</label>
+            <input type="number" id="yieldGrossInput" class="form-input" value="4000" step="250" oninput="updateYieldCalc()">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">% Aprovechamiento Limpio</label>
+            <input type="number" id="yieldPctInput" class="form-input" value="62" min="10" max="100" oninput="updateYieldCalc()">
+          </div>
+          <div>
+            <button class="btn pink" style="width:100%;" onclick="applyYieldToInventory()">
+              ➕ Sumar Neto Limpio al Stock
+            </button>
+          </div>
+        </div>
+        <div id="yieldSummaryBanner" style="margin-top:12px;background:var(--pink-50);border:1px solid var(--pink-border);border-radius:11px;padding:10px 14px;font-size:12.5px;color:var(--purple-900);font-weight:700;"></div>
+      </div>
+    </div>
+
+    <!-- -------------------------------------------------------------------
+         MÓDULO 4: ARQUITECTURA E INTEGRACIÓN CON TSUKIHANA & RESÉRVALO
+         ------------------------------------------------------------------- -->
+    <div class="app-module" id="mod-api">
+      <div class="panel-card">
+        <span class="status-pill st-ok" style="margin-bottom:8px;">🔌 Ecosistema Conectado en Tiempo Real</span>
+        <h2 style="font-family:var(--font-serif);font-size:26px;color:var(--purple-900);margin-bottom:8px;">
+          Integración Total: ScanStock OS × Tsukihana × Resérvalo
+        </h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:18px;">
+          Todas las pantallas del proyecto comparten la misma base de datos en vivo (`tsukihana_inventory_v1`). Haz clic en cualquiera para comprobar cómo se refleja el stock al instante:
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px;">
+          <div style="background:var(--pink-50);padding:15px;border-radius:16px;border:1.5px solid var(--pink-border);display:flex;flex-direction:column;justify-content:space-between;gap:10px;">
+            <div>
+              <span class="status-pill st-ok" style="margin-bottom:6px;">● Conectado</span>
+              <strong style="font-size:14px;color:var(--purple-900);display:block;">📖 05 · Página Carta Pública</strong>
+              <p style="font-size:12px;color:var(--muted);margin-top:4px;">Si pitas y agotas el salmón o la vieira aquí, las tarjetas de la Carta Pública cambian automáticamente a «🔴 Agotado Hoy».</p>
+            </div>
+            <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html" class="btn pink" style="text-decoration:none;font-size:11.5px;">Abrir Carta Pública (05) →</a>
+          </div>
+
+          <div style="background:var(--bg-lavender);padding:15px;border-radius:16px;border:1.5px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:10px;">
+            <div>
+              <span class="status-pill st-ok" style="margin-bottom:6px;">● Conectado</span>
+              <strong style="font-size:14px;color:var(--purple-900);display:block;">📱 08 · App Móvil (Cliente + Chef)</strong>
+              <p style="font-size:12px;color:var(--muted);margin-top:4px;">El iPhone del Chef lee y descuenta de este mismo stock, actualizando las barras de gramos en vivo.</p>
+            </div>
+            <a href="08_App_Movil_Tsukihana_Maqueta.html" class="btn light" style="text-decoration:none;font-size:11.5px;">Abrir App Móvil Dual (08) →</a>
+          </div>
+
+          <div style="background:var(--pink-50);padding:15px;border-radius:16px;border:1.5px solid var(--pink-border);display:flex;flex-direction:column;justify-content:space-between;gap:10px;">
+            <div>
+              <span class="status-pill st-ok" style="margin-bottom:6px;">● Conectado</span>
+              <strong style="font-size:14px;color:var(--purple-900);display:block;">⚖️ 06 · Gestor Gramaje & Turno</strong>
+              <p style="font-size:12px;color:var(--muted);margin-top:4px;">Cualquier ajuste manual o lectura de código se refleja sin recargar entre la herramienta 06 y esta aplicación 09.</p>
+            </div>
+            <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html" class="btn light" style="text-decoration:none;font-size:11.5px;">Abrir Gestor Gramaje (06) →</a>
+          </div>
+        </div>
+
+        <!-- Tabla de Escandallo y Food Cost en Tiempo Real por Receta -->
+        <h3 style="font-size:16px;font-weight:800;color:var(--purple-900);margin-bottom:8px;">
+          📊 Rentabilidad y Food Cost en Vivo por Código de Plato (Modo 2)
+        </h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Plato / Caja Tsukihana</th>
+                <th>Coste MP Exacto</th>
+                <th>PVP Carta</th>
+                <th>Food Cost %</th>
+                <th>Margen Bruto</th>
+                <th>Capacidad Actual</th>
+              </tr>
+            </thead>
+            <tbody id="liveFoodCostTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =====================================================================
+       COLUMNA DERECHA: IMPACTO EN VIVO EN TSUKIHANA (CARTA WEB + RESÉRVALO)
+       ===================================================================== -->
+  <aside id="colTsuki">
+    <div class="live-tsuki-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="pill-tag" style="background:var(--pink-50);color:var(--fuchsia-600);border-color:var(--pink-border);">
+          🌸 Vista en Vivo · Web Tsukihana & Resérvalo
+        </span>
+        <span style="font-size:11px;font-weight:800;color:#059669;">● Sincronizado</span>
+      </div>
+
+      <h3 style="font-family:var(--font-serif);font-size:23px;color:var(--purple-900);margin-bottom:4px;">
+        Disponibilidad Automática de Carta y Cupos
+      </h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        Mira cómo cambia el estado de cada plato en la web de Tsukihana en cuanto pitas con el escáner a la izquierda:
+      </p>
+
+      <!-- Resumen de capacidad máxima de Boxes hoy -->
+      <div class="sync-banner">
+        <div>
+          <strong style="color:var(--purple-900);display:block;">🍱 Capacidad Real según Nevera:</strong>
+          <span style="font-size:11.5px;color:var(--muted);" id="limitingFactorText">Calculando ingrediente limitante...</span>
+        </div>
+        <span style="font-family:var(--font-mono);font-size:16px;font-weight:800;color:var(--fuchsia-600);" id="maxBoxesLiveBadge">0 Boxes</span>
+      </div>
+
+      <!-- Lista en vivo de platos de la carta con su disponibilidad y botón de simular pedido web -->
+      <div class="dish-sync-list" id="liveMenuSyncList"></div>
+
+      <!-- Alertas rápidas de proveedores en el lateral -->
+      <div style="border-top:1.5px dashed var(--border);padding-top:12px;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="font-size:12px;text-transform:uppercase;color:var(--purple-900);">🚚 Avisos de Reposición Activos</strong>
+          <button class="btn light" style="padding:4px 10px;font-size:11px;" onclick="switchAppModule('suppliers')">
+            Ver Proveedores →
+          </button>
+        </div>
+        <div id="miniSupplierAlerts"></div>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<!-- NOTIFICACIÓN FLOTANTE (TOAST) -->
+<div class="toast-banner" id="toastBanner">
+  <strong id="toastTitle" style="display:block;font-size:13px;color:#fbcfe8;margin-bottom:2px;">✓ Lectura Procesada</strong>
+  <div id="toastBody" style="font-size:12px;color:#e9d5ff;">Stock actualizado en tiempo real.</div>
+</div>
+
+<script>
+// ============================================================================
+// 1. RECETARIO OFICIAL TSUKIHANA CON GRAMAJES EXACTOS Y PRECIOS
+// ============================================================================
+const DISH_RECIPES = [
+  {
+    id: 'box16',
+    code: '990016',
+    name: 'Box Tsukihana Selección (16 pzs)',
+    price: 26.50,
+    subtitle: '465 g netos · 8 ingredientes',
+    ingredients: { arroz_crudo: 124, salmon: 65, atun: 36, butterfish: 18, langostino: 28, aguacate: 35, nori: 1.5, caja_16: 1 }
+  },
+  {
+    id: 'box32',
+    code: '990032',
+    name: 'Box Luna Llena Compartir (32 pzs)',
+    price: 49.00,
+    subtitle: '920 g netos · 8 ingredientes',
+    ingredients: { arroz_crudo: 245, salmon: 130, atun: 82, butterfish: 36, langostino: 55, aguacate: 75, nori: 3.5, caja_32: 1 }
+  },
+  {
+    id: 'uramaki_tsuki',
+    code: '990008',
+    name: 'Uramaki Tsukihana Salmón (8 pzs)',
+    price: 14.50,
+    subtitle: '65g salmón + 45g aguacate + shari',
+    ingredients: { arroz_crudo: 62, salmon: 65, aguacate: 45, nori: 0.5, sesamo: 5 }
+  },
+  {
+    id: 'uramaki_ebi',
+    code: '990009',
+    name: 'Uramaki Ebi Tempura & Mango (8 pzs)',
+    price: 14.90,
+    subtitle: '55g langostino + 45g aguacate + shari',
+    ingredients: { arroz_crudo: 62, langostino: 55, aguacate: 45, nori: 0.5, salsas: 8 }
+  },
+  {
+    id: 'nigiri_sake',
+    code: '990002',
+    name: 'Nigiri Sake Aburi (2 pzs)',
+    price: 6.50,
+    subtitle: '36g salmón flambeado + 36g shari',
+    ingredients: { arroz_crudo: 17, salmon: 36, salsas: 4 }
+  },
+  {
+    id: 'nigiri_maguro',
+    code: '990003',
+    name: 'Nigiri Maguro Nikiri (2 pzs)',
+    price: 7.50,
+    subtitle: '36g atún rojo + 36g shari',
+    ingredients: { arroz_crudo: 17, atun: 36, salsas: 2 }
+  },
+  {
+    id: 'nigiri_butter',
+    code: '990005',
+    name: 'Nigiri Pez Mantequilla Trufa (2 pzs)',
+    price: 6.90,
+    subtitle: '36g pez mantequilla + trufa + shari',
+    ingredients: { arroz_crudo: 17, butterfish: 36, salsas: 4 }
+  },
+  {
+    id: 'nigiri_vieira',
+    code: '990006',
+    name: 'Nigiri Hotate Vieira Gallega (2 pzs)',
+    price: 7.90,
+    subtitle: '38g vieira limpia + mantequilla miso',
+    ingredients: { arroz_crudo: 17, vieira: 38, salsas: 4 }
+  },
+  {
+    id: 'gunkan_tuna',
+    code: '990004',
+    name: 'Gunkan Tartar Atún Picante (2 pzs)',
+    price: 7.80,
+    subtitle: '44g atún rojo + nori + mayo kimchi',
+    ingredients: { arroz_crudo: 17, atun: 44, nori: 0.3, salsas: 8 }
+  },
+  {
+    id: 'hosomaki_sake',
+    code: '990007',
+    name: 'Hosomaki Puro Salmón (6 pzs)',
+    price: 6.20,
+    subtitle: '35g salmón + 80g shari + nori',
+    ingredients: { arroz_crudo: 38, salmon: 35, nori: 0.5 }
+  }
+];
+
+// ============================================================================
+// 2. INVENTARIO BASE Y PROVEEDORES VINCULADOS
+// ============================================================================
+const INITIAL_INVENTORY = [
+  { id: 'salmon', name: 'Salmón Noruego en Lomos Limpios (Sake)', category: 'Pescados y Mariscos', storage: 'Congelado -20°C / Cámara 1°C', stock: 2400, minStock: 800, optimalStock: 3500, unit: 'g', costPerUnit: 0.0195, supplierId: 'lonja_vigo' },
+  { id: 'atun', name: 'Atún Rojo / Maguro Lomo Limpio', category: 'Pescados y Mariscos', storage: 'Ultracongelado -60°C / Cámara 1°C', stock: 1250, minStock: 500, optimalStock: 2000, unit: 'g', costPerUnit: 0.0320, supplierId: 'balfego' },
+  { id: 'butterfish', name: 'Pez Mantequilla Lomo Limpio', category: 'Pescados y Mariscos', storage: 'Congelado -20°C / Cámara 1°C', stock: 750, minStock: 350, optimalStock: 1200, unit: 'g', costPerUnit: 0.0220, supplierId: 'lonja_vigo' },
+  { id: 'vieira', name: 'Vieira Gallega Limpia (Hotate)', category: 'Pescados y Mariscos', storage: 'Congelado / Cámara 1°C', stock: 420, minStock: 250, optimalStock: 800, unit: 'g', costPerUnit: 0.0280, supplierId: 'lonja_vigo' },
+  { id: 'langostino', name: 'Langostino Ebi Limpio / Tempura', category: 'Pescados y Mariscos', storage: 'Congelado -20°C', stock: 900, minStock: 350, optimalStock: 1500, unit: 'g', costPerUnit: 0.0180, supplierId: 'lonja_vigo' },
+  { id: 'arroz_crudo', name: 'Arroz Japonés Grano Corto Koshihikari (Seco)', category: 'Base Sushi y Alga', storage: 'Almacén Seco', stock: 8500, minStock: 2500, optimalStock: 10000, unit: 'g', costPerUnit: 0.0038, supplierId: 'nippon_pantry' },
+  { id: 'nori', name: 'Alga Nori Gold Tostada (Hojas Enteras)', category: 'Base Sushi y Alga', storage: 'Envase Hermético Seco', stock: 85, minStock: 25, optimalStock: 100, unit: 'hojas', costPerUnit: 0.22, supplierId: 'nippon_pantry' },
+  { id: 'sesamo', name: 'Sésamo Blanco y Negro Tostado', category: 'Base Sushi y Alga', storage: 'Almacén Seco', stock: 450, minStock: 150, optimalStock: 600, unit: 'g', costPerUnit: 0.009, supplierId: 'nippon_pantry' },
+  { id: 'aguacate', name: 'Aguacate Hass en Punto de Maduración (Pulpa)', category: 'Vegetales y Salsas', storage: 'Cámara 6°C', stock: 1100, minStock: 400, optimalStock: 1800, unit: 'g', costPerUnit: 0.0065, supplierId: 'lonja_vigo' },
+  { id: 'salsas', name: 'Salsas Autor (Nikiri, Miso, Trufa, Kimchi)', category: 'Vegetales y Salsas', storage: 'Biberones Cámara 3°C', stock: 680, minStock: 200, optimalStock: 1000, unit: 'g', costPerUnit: 0.014, supplierId: 'nippon_pantry' },
+  { id: 'caja_16', name: 'Caja Premium Tsukihana 16 pzs + Palillos', category: 'Packaging', storage: 'Almacén Envases', stock: 42, minStock: 15, optimalStock: 60, unit: 'ud', costPerUnit: 1.25, supplierId: 'ecopack' },
+  { id: 'caja_32', name: 'Caja Gran Formato 32 pzs + Palillos', category: 'Packaging', storage: 'Almacén Envases', stock: 24, minStock: 10, optimalStock: 40, unit: 'ud', costPerUnit: 1.85, supplierId: 'ecopack' }
+];
+
+const SUPPLIERS = [
+  { id: 'lonja_vigo', name: 'Lonja de Vigo · Mariscos & Frescos Rías Baixas', contact: 'Manolo (Reparto 07:30h)', phone: '34600111222', email: 'pedidos@lonjavigofrescos.es', items: ['salmon', 'butterfish', 'vieira', 'langostino', 'aguacate'] },
+  { id: 'balfego', name: 'Balfegó Oficial · Atún Rojo Trazabilidad QR', contact: 'Dpto. Hostelería Galicia', phone: '34600333444', email: 'galicia@balfego.com', items: ['atun'] },
+  { id: 'nippon_pantry', name: 'Nippon Pantry · Importación Japonesa', contact: 'Almacén Madrid/Vigo 24h', phone: '34600555666', email: 'orders@nipponpantry.es', items: ['arroz_crudo', 'nori', 'sesamo', 'salsas'] },
+  { id: 'ecopack', name: 'EcoPack Galicia · Packaging Sushi Premium', contact: 'Laura Comercial', phone: '34600777888', email: 'info@ecopackgalicia.com', items: ['caja_16', 'caja_32'] }
+];
+
+// ============================================================================
+// 3. CATÁLOGO DE CÓDIGOS DE BARRAS (MODO 1 LOTES + MODO 2 RECETAS + CUSTOM)
+// ============================================================================
+const BASE_BARCODES = [
+  // Modo 1: Lotes de cámara / materia prima
+  { code: '841001', mode: 'raw', title: '🐟 Saku Salmón Limpio', subtitle: 'Lote Cámara · 250 g netos', ingId: 'salmon', amount: 250, unit: 'g' },
+  { code: '841002', mode: 'raw', title: '🍣 Saku Atún Rojo Balfegó', subtitle: 'Lote -60°C · 200 g netos', ingId: 'atun', amount: 200, unit: 'g' },
+  { code: '841003', mode: 'raw', title: '🐡 Lomo Pez Mantequilla', subtitle: 'Porción Vacío · 150 g netos', ingId: 'butterfish', amount: 150, unit: 'g' },
+  { code: '841004', mode: 'raw', title: '🐚 Bandeja Vieira Gallega', subtitle: 'Lote Cámara · 120 g netos', ingId: 'vieira', amount: 120, unit: 'g' },
+  { code: '841007', mode: 'raw', title: '🦐 Pack Langostino Ebi', subtitle: 'Congelado · 250 g netos', ingId: 'langostino', amount: 250, unit: 'g' },
+  { code: '841005', mode: 'raw', title: '🌾 Saco Arroz Koshihikari', subtitle: 'Olla Shari · 1.000 g secos', ingId: 'arroz_crudo', amount: 1000, unit: 'g' },
+  { code: '841006', mode: 'raw', title: '🍙 Paquete Alga Nori Gold', subtitle: 'Pack Taller · 10 hojas', ingId: 'nori', amount: 10, unit: 'hojas' },
+  { code: '841008', mode: 'raw', title: '🥑 Bandeja Pulpa Aguacate', subtitle: 'Cámara 6°C · 300 g netos', ingId: 'aguacate', amount: 300, unit: 'g' },
+
+  // Modo 2: Cajas y platos terminados (descuentan toda la receta)
+  { code: '990016', mode: 'dish', title: '🍱 Box Selección 16 pzs', subtitle: 'Descuenta 8 ingred. (465g + caja)', dishId: 'box16' },
+  { code: '990032', mode: 'dish', title: '🌕 Box Luna Llena 32 pzs', subtitle: 'Descuenta 8 ingred. (920g + caja)', dishId: 'box32' },
+  { code: '990008', mode: 'dish', title: '🌀 Uramaki Tsukihana (8p)', subtitle: 'Descuenta 65g salmón + shari', dishId: 'uramaki_tsuki' },
+  { code: '990002', mode: 'dish', title: '🔥 Nigiri Sake Aburi (2p)', subtitle: 'Descuenta 36g salmón + shari', dishId: 'nigiri_sake' },
+  { code: '990006', mode: 'dish', title: '🐚 Nigiri Vieira Hotate (2p)', subtitle: 'Descuenta 38g vieira + shari', dishId: 'nigiri_vieira' },
+  { code: '990004', mode: 'dish', title: '🍣 Gunkan Tartar Atún (2p)', subtitle: 'Descuenta 44g atún + nori', dishId: 'gunkan_tuna' }
+];
+
+let inventory = [];
+let customBarcodes = [];
+let scanMode = 'out'; // 'out' (-), 'in' (+), 'waste' (- merma)
+let currentCardFilter = 'all';
+let scanCountToday = 0;
+let wasteEurToday = 0;
+let undoStack = [];
+let activeCameraStream = null;
+let barcodeDetectorTimer = null;
+
+// ============================================================================
+// 4. CARGA Y SINCRONIZACIÓN CON LOCALSTORAGE (CONECTADO CON 06)
+// ============================================================================
+function loadState() {
+  try {
+    const savedInv = localStorage.getItem('tsukihana_inventory_v1');
+    if (savedInv) {
+      const parsed = JSON.parse(savedInv);
+      inventory = INITIAL_INVENTORY.map(base => {
+        const found = parsed.find(p => p.id === base.id);
+        return found ? { ...base, ...found } : { ...base };
+      });
+    } else {
+      inventory = JSON.parse(JSON.stringify(INITIAL_INVENTORY));
+    }
+  } catch (e) {
+    inventory = JSON.parse(JSON.stringify(INITIAL_INVENTORY));
+  }
+
+  try {
+    const savedCustom = localStorage.getItem('tsukihana_custom_barcodes_v1');
+    if (savedCustom) customBarcodes = JSON.parse(savedCustom);
+  } catch (e) {
+    customBarcodes = [];
+  }
+}
+
+function saveState() {
+  localStorage.setItem('tsukihana_inventory_v1', JSON.stringify(inventory));
+  localStorage.setItem('tsukihana_custom_barcodes_v1', JSON.stringify(customBarcodes));
+  refreshAllViews();
+}
+
+// Escuchar cambios desde otra pestaña abierta (ej. 06_Gestor_Inventario)
+window.addEventListener('storage', function(e) {
+  if (e.key === 'tsukihana_inventory_v1') {
+    loadState();
+    refreshAllViews();
+    showToast('🔄 Sincronizado con Tsukihana 06', 'El inventario se ha actualizado desde otra pestaña.');
+  }
+});
+
+function getAllBarcodes() {
+  return [...customBarcodes, ...BASE_BARCODES];
+}
+
+// ============================================================================
+// 5. MOTOR DE SONIDO LÁSER Y NOTIFICACIONES
+// ============================================================================
+function playScannerSound(type = 'ok') {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    if (type === 'ok') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(2400, ctx.currentTime);
+      gain.gain.setValueAtTime(0.14, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.085);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.085);
+    } else if (type === 'warn') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.22);
+    } else {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(290, ctx.currentTime);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.28);
+    }
+  } catch (e) {}
+}
+
+let toastTimer = null;
+function showToast(title, body) {
+  const banner = document.getElementById('toastBanner');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastBody').textContent = body;
+  banner.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => banner.classList.remove('show'), 4200);
+}
+
+// ============================================================================
+// 6. PROCESADOR CENTRAL DE LECTURA DE CÓDIGOS DE BARRAS
+// ============================================================================
+function setScanMode(mode) {
+  scanMode = mode;
+  document.getElementById('dirOutBtn').classList.toggle('active', mode === 'out');
+  document.getElementById('dirInBtn').classList.toggle('active', mode === 'in');
+  document.getElementById('dirWasteBtn').classList.toggle('active', mode === 'waste');
+}
+
+function executeBarcodeScan(rawCode) {
+  const code = String(rawCode || '').trim();
+  if (!code) return;
+
+  const inputEl = document.getElementById('laserBarcodeInput');
+  if (inputEl) inputEl.value = '';
+
+  const sign = scanMode === 'in' ? 1 : -1;
+  const modeLabel = scanMode === 'in' ? '📥 ENTRADA (+)' : (scanMode === 'waste' ? '🗑️ MERMA (-)' : '📤 SALIDA (-)');
+  const timeStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const prevSnapshot = [];
+
+  // 1. Buscar en catálogo (Base + Custom APPCC)
+  const entry = getAllBarcodes().find(b => b.code === code);
+  if (entry) {
+    if (entry.mode === 'raw' || entry.mode === 'custom') {
+      const invItem = inventory.find(i => i.id === entry.ingId);
+      if (invItem) {
+        const prev = Number(invItem.stock) || 0;
+        const next = Math.max(0, Number((prev + (entry.amount * sign)).toFixed(1)));
+        prevSnapshot.push({ id: invItem.id, prevStock: prev });
+        invItem.stock = next;
+
+        const moveEur = (entry.amount * (invItem.costPerUnit || 0));
+        if (scanMode === 'waste') wasteEurToday += moveEur;
+
+        const isLowNow = next <= invItem.minStock;
+        playScannerSound(isLowNow && sign < 0 ? 'warn' : 'ok');
+
+        prependScanLog({
+          time: timeStr,
+          code: entry.code,
+          title: `${modeLabel} · ${entry.title}`,
+          detail: `${sign > 0 ? 'Sumados' : 'Descontados'} ${entry.amount} ${entry.unit} (${moveEur.toFixed(2)} €) → Stock actual: ${next} ${entry.unit}${isLowNow ? ' ⚠️ BAJO MÍNIMO' : ''}`,
+          status: isLowNow && sign < 0 ? 'warn' : 'ok'
+        });
+        showToast(`${modeLabel} ${entry.title}`, `Quedan ${next} ${entry.unit} en cámara.`);
+      }
+    } else if (entry.mode === 'dish') {
+      const dish = DISH_RECIPES.find(d => d.id === entry.dishId);
+      if (dish) {
+        const parts = [];
+        let dishCost = 0;
+        Object.entries(dish.ingredients).forEach(([ingId, reqQty]) => {
+          const invItem = inventory.find(i => i.id === ingId);
+          if (invItem) {
+            const prev = Number(invItem.stock) || 0;
+            const next = Math.max(0, Number((prev + (reqQty * sign)).toFixed(1)));
+            prevSnapshot.push({ id: invItem.id, prevStock: prev });
+            invItem.stock = next;
+            dishCost += reqQty * (invItem.costPerUnit || 0);
+            parts.push(`${sign > 0 ? '+' : '-'}${reqQty}${invItem.unit} ${invItem.id}`);
+          }
+        });
+        if (scanMode === 'waste') wasteEurToday += dishCost;
+        playScannerSound('ok');
+        prependScanLog({
+          time: timeStr,
+          code: entry.code,
+          title: `${modeLabel} · ${entry.title}`,
+          detail: `Receta completa (${dishCost.toFixed(2)} € coste MP): ${parts.join(', ')}`,
+          status: 'ok'
+        });
+        showToast(`${modeLabel} ${entry.title}`, `Descontados los ${Object.keys(dish.ingredients).length} ingredientes de la receta.`);
+      }
+    }
+
+    if (prevSnapshot.length > 0) {
+      undoStack.push({ changes: prevSnapshot, wasWaste: scanMode === 'waste' });
+      scanCountToday++;
+      document.getElementById('kpiLastScanCode').textContent = `Último: [${code}] ${timeStr}`;
+      saveState();
+    }
+    return;
+  }
+
+  // 2. Comprobar si es código dinámico de báscula (7 dígitos empezando por 20: 20 + ID + 4 dígitos gramos)
+  if (code.length === 7 && code.startsWith('20')) {
+    const mapByDigit = { '1': 'salmon', '2': 'atun', '3': 'butterfish', '4': 'vieira', '5': 'aguacate' };
+    const ingId = mapByDigit[code[2]] || 'salmon';
+    const grams = parseInt(code.slice(3), 10) || 0;
+    const invItem = inventory.find(i => i.id === ingId);
+
+    if (invItem && grams > 0) {
+      const prev = Number(invItem.stock) || 0;
+      const next = Math.max(0, Number((prev + (grams * sign)).toFixed(1)));
+      undoStack.push({ changes: [{ id: invItem.id, prevStock: prev }], wasWaste: false });
+      invItem.stock = next;
+      scanCountToday++;
+      document.getElementById('kpiLastScanCode').textContent = `Báscula: [${code}]`;
+      playScannerSound('ok');
+      prependScanLog({
+        time: timeStr,
+        code,
+        title: `${modeLabel} Báscula · ${invItem.name.split('(')[0]}`,
+        detail: `Peso dinámico leído: ${grams} g → Stock actual: ${next} g`,
+        status: 'ok'
+      });
+      showToast(`⚖️ Báscula: ${grams} g`, `${invItem.name.split('(')[0]} → ${next} g disponibles.`);
+      saveState();
+      return;
+    }
+  }
+
+  // 3. Código desconocido
+  playScannerSound('err');
+  prependScanLog({
+    time: timeStr,
+    code,
+    title: `⚠️ Código no registrado (${code})`,
+    detail: `Puedes crear este código en la pestaña «2. Etiquetas & APPCC» o usar 841001–841008 / 990002–990032.`,
+    status: 'err'
+  });
+  showToast(`⚠️ Código desconocido (${code})`, `Regístralo en el Generador de Etiquetas APPCC.`);
+}
+
+function prependScanLog({ time, code, title, detail, status }) {
+  const box = document.getElementById('liveScanLog');
+  if (!box) return;
+  const div = document.createElement('div');
+  div.className = `log-entry ${status === 'err' ? 'err' : (status === 'warn' ? 'warn' : '')}`;
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <strong style="color:${status === 'err' ? '#fca5a5' : (status === 'warn' ? '#fde68a' : '#a7f3d0')};">${title}</strong>
+      <span style="font-family:var(--font-mono);font-size:10.5px;color:#fbcfe8;">[${code}] · ${time}</span>
+    </div>
+    <div style="color:#e9d5ff;margin-top:2px;">${detail}</div>
+  `;
+  box.prepend(div);
+}
+
+function undoLastBarcodeScan() {
+  if (undoStack.length === 0) {
+    showToast('ℹ️ Sin lecturas recientes', 'No hay escaneos previos para deshacer.');
+    return;
+  }
+  const last = undoStack.pop();
+  last.changes.forEach(c => {
+    const item = inventory.find(i => i.id === c.id);
+    if (item) item.stock = c.prevStock;
+  });
+  scanCountToday = Math.max(0, scanCountToday - 1);
+  playScannerSound('ok');
+  prependScanLog({
+    time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    code: 'UNDO',
+    title: '↩️ Última lectura revertida con éxito',
+    detail: 'Se ha restaurado el gramaje exacto previo al disparo del escáner.',
+    status: 'ok'
+  });
+  saveState();
+  showToast('↩️ Lectura revertida', 'El stock ha vuelto a su estado anterior.');
+}
+
+// ============================================================================
+// 7. CÁMARA EN VIVO + DETECTOR DE CÓDIGOS DE BARRAS
+// ============================================================================
+async function toggleCameraDrawer() {
+  const drawer = document.getElementById('cameraDrawer');
+  const video = document.getElementById('liveScannerVideo');
+
+  if (drawer.classList.contains('open')) {
+    drawer.classList.remove('open');
+    if (barcodeDetectorTimer) clearInterval(barcodeDetectorTimer);
+    if (activeCameraStream) {
+      activeCameraStream.getTracks().forEach(t => t.stop());
+      activeCameraStream = null;
+    }
+    return;
+  }
+
+  drawer.classList.add('open');
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      activeCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = activeCameraStream;
+
+      // Si el navegador soporta BarcodeDetector nativo (Chrome/Edge/Android), escanear frames reales
+      if ('BarcodeDetector' in window) {
+        document.getElementById('camDetectorStatus').textContent = 'BarcodeDetector Óptico Activo';
+        const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'qr_code'] });
+        barcodeDetectorTimer = setInterval(async () => {
+          try {
+            const codes = await detector.detect(video);
+            if (codes.length > 0 && codes[0].rawValue) {
+              executeBarcodeScan(codes[0].rawValue);
+            }
+          } catch (err) {}
+        }, 1200);
+      }
+    }
+  } catch (e) {
+    document.getElementById('camDetectorStatus').textContent = 'Modo Simulador Láser';
+  }
+}
+
+function simulateCameraDetection(type) {
+  const pool = getAllBarcodes().filter(b => type === 'raw' ? b.mode !== 'dish' : b.mode === 'dish');
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  if (pick) executeBarcodeScan(pick.code);
+}
+
+// ============================================================================
+// 8. ESCUCHA GLOBAL AUTOMÁTICA PARA PISTOLA LÁSER USB/BLUETOOTH (HID WEDGE)
+// ============================================================================
+let hidKeyBuffer = '';
+let hidLastTick = 0;
+window.addEventListener('keydown', function(e) {
+  const tag = document.activeElement ? document.activeElement.tagName : '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+  const now = Date.now();
+  if (now - hidLastTick > 120) hidKeyBuffer = '';
+  hidLastTick = now;
+
+  if (e.key === 'Enter' && hidKeyBuffer.length >= 4) {
+    executeBarcodeScan(hidKeyBuffer);
+    hidKeyBuffer = '';
+    e.preventDefault();
+  } else if (e.key.length === 1) {
+    hidKeyBuffer += e.key;
+  }
+});
+
+// ============================================================================
+// 9. RENDERIZADO DE TARJETAS DE ESCÁNER, BÁSCULA E INVENTARIO
+// ============================================================================
+function filterCatalogCards(filter, btn) {
+  currentCardFilter = filter;
+  document.querySelectorAll('.bc-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderBarcodeCards();
+}
+
+function renderBarcodeCards() {
+  const grid = document.getElementById('barcodeCardsGrid');
+  if (!grid) return;
+
+  const all = getAllBarcodes();
+  const filtered = currentCardFilter === 'all'
+    ? all
+    : all.filter(b => b.mode === currentCardFilter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:14px;background:rgba(255,255,255,0.08);border-radius:12px;font-size:12px;color:#fbcfe8;">Aún no has creado etiquetas personalizadas APPCC. Ve a la pestaña «2. Etiquetas & APPCC» para crear una.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(b => {
+    const cls = b.mode === 'dish' ? 'dish-card' : (b.mode === 'custom' ? 'custom-card' : '');
+    const badge = b.mode === 'dish' ? 'MODO 2 · RECETA' : (b.mode === 'custom' ? 'APPCC LOTE' : 'MODO 1 · LOTE');
+    return `
+      <div class="bc-card ${cls}" onclick="executeBarcodeScan('${b.code}')">
+        <div>
+          <div class="bc-visual-code">||| | ||| || ${b.code}</div>
+          <strong>${b.title}</strong>
+          <small>${b.subtitle}</small>
+        </div>
+        <div class="bc-card-foot">
+          <span>${badge}</span>
+          <span>🔫 Pitar →</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateDynamicScaleCode() {
+  const digit = document.getElementById('scaleFishSelect').value;
+  const grams = Math.min(9999, Math.max(1, parseInt(document.getElementById('scaleGramsInput').value, 10) || 0));
+  const padded = String(grams).padStart(4, '0');
+  const code = `20${digit}${padded}`;
+  document.getElementById('scaleTriggerBtn').textContent = `🔫 Pitar ${code}`;
+  return code;
+}
+
+function triggerScaleBarcode() {
+  const code = updateDynamicScaleCode();
+  executeBarcodeScan(code);
+}
+
+function renderInventoryTable() {
+  const q = (document.getElementById('stockSearchInput')?.value || '').toLowerCase();
+  const tbody = document.getElementById('inventoryTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = inventory.map((item, idx) => {
+    if (q && !(`${item.name} ${item.category}`.toLowerCase().includes(q))) return '';
+    const stock = Number(item.stock) || 0;
+    const min = Number(item.minStock) || 0;
+    const step = item.unit === 'g' ? 100 : 5;
+    const valEur = (stock * (item.costPerUnit || 0)).toFixed(2).replace('.', ',');
+
+    let badge = '<span class="status-pill st-ok">🟢 OK en Cámara</span>';
+    if (stock <= 0) badge = '<span class="status-pill st-bad">🔴 AGOTADO (Bloquea Carta)</span>';
+    else if (stock <= min) badge = '<span class="status-pill st-warn">🟡 Bajo Mínimo (Pedir)</span>';
+
+    return `
+      <tr>
+        <td>
+          <strong style="color:var(--purple-900);display:block;">${item.name}</strong>
+          <span style="font-size:11px;color:var(--muted);">${item.storage}</span>
+        </td>
+        <td><span style="font-size:11.5px;font-weight:700;color:var(--purple-700);">${item.category}</span></td>
+        <td style="white-space:nowrap;">
+          <input type="number" value="${stock}" onchange="manualStockEdit(${idx}, this.value)"
+                 style="width:82px;padding:6px 8px;border-radius:8px;border:1.5px solid var(--purple-600);font-family:var(--font-mono);font-weight:800;text-align:right;color:var(--purple-900);">
+          <strong style="font-size:12px;margin-left:3px;">${item.unit}</strong>
+        </td>
+        <td style="white-space:nowrap;">
+          <button class="btn light" style="padding:4px 8px;font-size:11px;" onclick="quickStepStock(${idx}, ${step})">+${step}</button>
+          <button class="btn light" style="padding:4px 8px;font-size:11px;" onclick="quickStepStock(${idx}, -${step})">-${step}</button>
+        </td>
+        <td style="font-family:var(--font-mono);font-size:12px;color:var(--muted);">${min} ${item.unit}</td>
+        <td style="font-family:var(--font-mono);font-weight:800;color:var(--purple-900);">${valEur} €</td>
+        <td>${badge}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function manualStockEdit(idx, val) {
+  inventory[idx].stock = Math.max(0, parseFloat(val) || 0);
+  saveState();
+}
+
+function quickStepStock(idx, delta) {
+  inventory[idx].stock = Math.max(0, Number(((Number(inventory[idx].stock) || 0) + delta).toFixed(1)));
+  saveState();
+}
+
+// ============================================================================
+// 10. SINCRONIZACIÓN EN TIEMPO REAL CON CARTA DE TSUKIHANA Y RESÉRVALO
+// ============================================================================
+function calculateDishAvailability(dish) {
+  let maxUnits = Infinity;
+  const missingList = [];
+
+  Object.entries(dish.ingredients).forEach(([ingId, reqAmount]) => {
+    const inv = inventory.find(i => i.id === ingId);
+    const avail = inv ? (Number(inv.stock) || 0) : 0;
+    const possible = Math.floor(avail / reqAmount);
+    if (possible < maxUnits) maxUnits = possible;
+    if (avail < reqAmount) {
+      const shortName = inv ? inv.name.split('(')[0].trim().split(' ').slice(0, 2).join(' ') : ingId;
+      missingList.push(`${shortName} (faltan ${(reqAmount - avail).toFixed(0)}${inv ? inv.unit : 'g'})`);
+    }
+  });
+
+  return {
+    maxUnits: maxUnits === Infinity ? 0 : Math.max(0, maxUnits),
+    missingList
+  };
+}
+
+function renderLiveTsukihanaMenu() {
+  const container = document.getElementById('liveMenuSyncList');
+  if (!container) return;
+
+  let activeDishesCount = 0;
+
+  container.innerHTML = DISH_RECIPES.map(dish => {
+    const { maxUnits, missingList } = calculateDishAvailability(dish);
+    const isSoldOut = maxUnits === 0;
+    const isLow = !isSoldOut && maxUnits <= 4;
+    if (!isSoldOut) activeDishesCount++;
+
+    let statusHtml = `<span class="status-pill st-ok">🟢 En Carta (${maxUnits} disp.)</span>`;
+    if (isSoldOut) {
+      statusHtml = `<span class="status-pill st-bad">🔴 AGOTADO EN WEB</span>`;
+    } else if (isLow) {
+      statusHtml = `<span class="status-pill st-warn">🟡 Últimas ${maxUnits} uds</span>`;
+    }
+
+    const subDetail = isSoldOut
+      ? `<div style="font-size:11px;color:#b91c1c;font-weight:700;margin-top:2px;">⚠️ Bloqueado por falta de: ${missingList.join(', ')}</div>`
+      : `<div style="font-size:11px;color:var(--muted);">${dish.subtitle} · <strong>${dish.price.toFixed(2)} €</strong></div>`;
+
+    return `
+      <div class="dish-sync-card ${isSoldOut ? 'soldout' : (isLow ? 'low' : '')}">
+        <div style="min-width:0;flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <strong style="font-size:13px;color:var(--purple-900);">${dish.name}</strong>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">[${dish.code}]</span>
+          </div>
+          ${subDetail}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          ${statusHtml}
+          <button class="btn light" style="padding:3px 9px;font-size:10.5px;${isSoldOut ? 'opacity:0.4;cursor:not-allowed;' : ''}"
+                  onclick="${isSoldOut ? '' : `setScanMode('out');executeBarcodeScan('${dish.code}')`}">
+            ${isSoldOut ? 'No disponible' : '🛒 Simular Pedido (-1)'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Actualizar indicador de capacidad de Boxes 16p
+  const box16Dish = DISH_RECIPES[0];
+  const box16Avail = calculateDishAvailability(box16Dish);
+  document.getElementById('maxBoxesLiveBadge').textContent = `${box16Avail.maxUnits} Boxes`;
+  document.getElementById('limitingFactorText').textContent = box16Avail.maxUnits === 0
+    ? `Bloqueado: ${box16Avail.missingList.join(', ')}`
+    : `Carta sincronizada (${activeDishesCount} de ${DISH_RECIPES.length} platos activos)`;
+
+  document.getElementById('kpiActiveDishes').textContent = `${activeDishesCount} / ${DISH_RECIPES.length}`;
+  document.getElementById('kpiDishesSub').textContent = activeDishesCount === DISH_RECIPES.length
+    ? '100% Carta Operativa'
+    : `⚠️ ${DISH_RECIPES.length - activeDishesCount} platos pausados por stock`;
+}
+
+// ============================================================================
+// 11. GENERADOR DE ETIQUETAS Y CÓDIGO DE BARRAS SVG REAL (MÓDULO 2)
+// ============================================================================
+function populateLabelTargetOptions() {
+  const mode = document.getElementById('lblMode').value;
+  const sel = document.getElementById('lblTargetId');
+  if (mode === 'raw') {
+    sel.innerHTML = inventory.map(i => `<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
+  } else {
+    sel.innerHTML = DISH_RECIPES.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  }
+  onLabelTargetChange();
+}
+
+function onLabelFormChange() {
+  populateLabelTargetOptions();
+}
+
+function onLabelTargetChange() {
+  const mode = document.getElementById('lblMode').value;
+  const targetId = document.getElementById('lblTargetId').value;
+  if (mode === 'raw') {
+    const item = inventory.find(i => i.id === targetId);
+    if (item) {
+      document.getElementById('lblCustomTitle').value = `Lote ${item.name.split('(')[0].trim()}`;
+      document.getElementById('lblAmount').value = item.unit === 'g' ? 250 : 10;
+      document.getElementById('lblLotNumber').value = `LOT-261017-${item.id.slice(0, 3).toUpperCase()}`;
+    }
+  } else {
+    const dish = DISH_RECIPES.find(d => d.id === targetId);
+    if (dish) {
+      document.getElementById('lblCustomTitle').value = dish.name;
+      document.getElementById('lblAmount').value = 1;
+      document.getElementById('lblBarcode').value = dish.code;
+      document.getElementById('lblLotNumber').value = `ORD-261017-${dish.id.toUpperCase()}`;
+    }
+  }
+  renderThermalLabelPreview();
+}
+
+function generateNewRandomBarcode() {
+  const randomCode = '849' + Math.floor(100 + Math.random() * 899);
+  document.getElementById('lblBarcode').value = randomCode;
+  renderThermalLabelPreview();
+}
+
+function drawBarcodeSvg(codeStr) {
+  const svg = document.getElementById('barcodeSvg');
+  if (!svg) return;
+  const clean = String(codeStr || '841001').trim();
+  let barsHtml = '';
+  let x = 14;
+
+  // Guard bars inicio
+  barsHtml += `<rect x="${x}" y="4" width="2" height="50" fill="#000"/><rect x="${x+4}" y="4" width="2" height="50" fill="#000"/>`;
+  x += 10;
+
+  for (let i = 0; i < clean.length; i++) {
+    const charCode = clean.charCodeAt(i);
+    const w1 = (charCode % 3) + 1.5;
+    const g1 = ((charCode >> 1) % 2) + 1.5;
+    const w2 = ((charCode >> 2) % 3) + 1.5;
+    const g2 = 2;
+    barsHtml += `<rect x="${x}" y="4" width="${w1}" height="46" fill="#000"/>`;
+    x += w1 + g1;
+    barsHtml += `<rect x="${x}" y="4" width="${w2}" height="46" fill="#000"/>`;
+    x += w2 + g2;
+    if (i % 2 === 0) {
+      barsHtml += `<rect x="${x}" y="4" width="1.5" height="46" fill="#000"/>`;
+      x += 4;
+    }
+  }
+
+  // Guard bars fin
+  barsHtml += `<rect x="${x}" y="4" width="2" height="50" fill="#000"/><rect x="${x+4}" y="4" width="2.5" height="50" fill="#000"/>`;
+  svg.setAttribute('viewBox', `0 0 ${Math.max(180, x + 20)} 56`);
+  svg.innerHTML = barsHtml;
+}
+
+function renderThermalLabelPreview() {
+  const mode = document.getElementById('lblMode').value;
+  const targetId = document.getElementById('lblTargetId').value;
+  const title = document.getElementById('lblCustomTitle').value || 'Etiqueta Tsukihana';
+  const amount = parseFloat(document.getElementById('lblAmount').value) || 1;
+  const code = document.getElementById('lblBarcode').value || '841025';
+  const lot = document.getElementById('lblLotNumber').value || 'LOT-261017';
+  const supplier = document.getElementById('lblSupplier').value || 'Tsukihana Vigo';
+  const temp = document.getElementById('lblTemp').value;
+  const dProd = document.getElementById('lblDateProd').value;
+  const dExp = document.getElementById('lblDateExp').value;
+
+  const invItem = inventory.find(i => i.id === targetId);
+  const unit = mode === 'raw' ? (invItem ? invItem.unit : 'g') : 'ud';
+
+  document.getElementById('prevModeTag').textContent = mode === 'raw' ? 'APPCC LOTE CÁMARA' : 'CAJA DELIVERY';
+  document.getElementById('prevTitle').textContent = title;
+  document.getElementById('prevSupplier').textContent = `Origen: ${supplier}`;
+  document.getElementById('prevWeight').textContent = `${amount} ${unit}`;
+  document.getElementById('prevLot').textContent = lot;
+  document.getElementById('prevProdDate').textContent = dProd.split('-').reverse().join('/');
+  document.getElementById('prevExpDate').textContent = `${dExp.split('-').reverse().join('/')} · 23:59h`;
+  document.getElementById('prevTemp').textContent = temp;
+  document.getElementById('prevCodeText').textContent = code;
+
+  drawBarcodeSvg(code);
+}
+
+function saveLabelAndAddStock() {
+  const mode = document.getElementById('lblMode').value;
+  const targetId = document.getElementById('lblTargetId').value;
+  const title = document.getElementById('lblCustomTitle').value || 'Lote APPCC';
+  const amount = parseFloat(document.getElementById('lblAmount').value) || 250;
+  const code = String(document.getElementById('lblBarcode').value || '841099').trim();
+  const lot = document.getElementById('lblLotNumber').value || 'LOT-APPCC';
+
+  if (mode === 'raw') {
+    const invItem = inventory.find(i => i.id === targetId);
+    const unit = invItem ? invItem.unit : 'g';
+
+    // Guardar en catálogo de etiquetas personalizadas
+    customBarcodes = customBarcodes.filter(b => b.code !== code);
+    customBarcodes.unshift({
+      code,
+      mode: 'custom',
+      title: `🏷️ ${title}`,
+      subtitle: `${lot} · ${amount} ${unit}`,
+      ingId: targetId,
+      amount,
+      unit
+    });
+
+    // Sumar el lote recién etiquetado al stock disponible
+    if (invItem) {
+      invItem.stock = Number(((Number(invItem.stock) || 0) + amount).toFixed(1));
+    }
+
+    playScannerSound('ok');
+    saveState();
+    showToast(`🏷️ Etiqueta [${code}] Creada y Sumada`, `Se han sumado +${amount} ${unit} al stock y la etiqueta ya está lista en el Escáner.`);
+    switchAppModule('scanner');
+    filterCatalogCards('custom');
+  } else {
+    showToast(`🍱 Etiqueta de Caja [${code}] Lista`, `Puedes imprimirla o pitarla directamente en el escáner.`);
+    switchAppModule('scanner');
+  }
+}
+
+// ============================================================================
+// 12. PROVEEDORES AUTOMÁTICOS WHATSAPP Y MERMAS (MÓDULO 3)
+// ============================================================================
+function renderSuppliersAndAlerts() {
+  const grid = document.getElementById('suppliersGrid');
+  const miniBox = document.getElementById('miniSupplierAlerts');
+  if (!grid || !miniBox) return;
+
+  let totalAlerts = 0;
+  const miniHtml = [];
+
+  grid.innerHTML = SUPPLIERS.map(sup => {
+    const supItems = inventory.filter(i => sup.items.includes(i.id));
+    const lowItems = supItems.filter(i => (Number(i.stock) || 0) <= (Number(i.minStock) || 0));
+    const hasUrgent = lowItems.some(i => (Number(i.stock) || 0) === 0);
+
+    totalAlerts += lowItems.length;
+
+    const orderLines = (lowItems.length > 0 ? lowItems : supItems).map(i => {
+      const needed = Math.max(i.unit === 'g' ? 1000 : 20, (i.optimalStock || i.minStock * 2) - (Number(i.stock) || 0));
+      return `• ${i.name.split('(')[0].trim()}: pedir +${needed} ${i.unit} (quedan ${i.stock} ${i.unit})`;
+    });
+
+    const waText = `Hola ${sup.name.split('·')[0].trim()} 👋, soy José de Tsukihana Sushi (Vigo). Necesito confirmar este pedido de reposición para el próximo reparto:\n${orderLines.join('\n')}\n¡Gracias!`;
+    const waUrl = `https://wa.me/${sup.phone}?text=${encodeURIComponent(waText)}`;
+
+    if (lowItems.length > 0) {
+      miniHtml.push(`
+        <div style="background:${hasUrgent ? '#fef2f2' : '#fffbeb'};border:1px solid ${hasUrgent ? '#fca5a5' : '#fcd34d'};border-radius:10px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div style="font-size:11.5px;">
+            <strong style="color:var(--purple-900);display:block;">${sup.name.split('·')[0]}</strong>
+            <span style="color:#b91c1c;">Falta: ${lowItems.map(x => x.name.split(' ')[0]).join(', ')}</span>
+          </div>
+          <a href="${waUrl}" target="_blank" class="btn whatsapp" style="padding:5px 9px;font-size:10.5px;text-decoration:none;">💬 WhatsApp</a>
+        </div>
+      `);
+    }
+
+    return `
+      <div class="supplier-card ${hasUrgent ? 'urgent-order' : (lowItems.length > 0 ? 'needs-order' : '')}">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span class="status-pill ${lowItems.length > 0 ? (hasUrgent ? 'st-bad' : 'st-warn') : 'st-ok'}">
+              ${lowItems.length > 0 ? `⚠️ ${lowItems.length} ref. para pedir` : '🟢 Stock Cubierto'}
+            </span>
+            <span style="font-size:11px;font-weight:700;color:var(--muted);">${sup.contact}</span>
+          </div>
+          <h4 style="font-size:15px;font-weight:800;color:var(--purple-900);margin-bottom:8px;">${sup.name}</h4>
+          <div class="wa-preview-box">
+            <strong style="display:block;margin-bottom:3px;font-size:10.5px;text-transform:uppercase;">📱 Mensaje WhatsApp Autogenerado:</strong>
+            <div style="white-space:pre-line;">${waText}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a href="${waUrl}" target="_blank" class="btn whatsapp" style="flex:1;text-decoration:none;">
+            💬 Enviar WhatsApp
+          </a>
+          <button class="btn light" onclick="receiveSupplierOrder('${sup.id}')">
+            📥 Recibir Mercancía (+Stock)
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  miniBox.innerHTML = miniHtml.length > 0
+    ? miniHtml.join('')
+    : `<div style="font-size:12px;color:#047857;background:#ecfdf5;padding:9px 12px;border-radius:10px;font-weight:700;">✓ Todos los ingredientes están por encima del stock mínimo.</div>`;
+
+  document.getElementById('supplierAlertBadge').textContent = totalAlerts;
+  document.getElementById('kpiLowAlerts').textContent = totalAlerts;
+  document.getElementById('kpiLowSub').textContent = totalAlerts > 0 ? `${totalAlerts} ingredientes bajo mínimo` : 'Todo el stock en verde';
+}
+
+function receiveSupplierOrder(supplierId) {
+  const sup = SUPPLIERS.find(s => s.id === supplierId);
+  if (!sup) return;
+  inventory.forEach(item => {
+    if (sup.items.includes(item.id)) {
+      item.stock = Math.max(Number(item.stock) || 0, item.optimalStock || (item.minStock * 2.5));
+    }
+  });
+  playScannerSound('ok');
+  saveState();
+  showToast(`📥 Mercancía recibida: ${sup.name.split('·')[0]}`, `Stock repuesto al nivel óptimo y Carta Tsukihana reactivada.`);
+}
+
+function replenishAllLowStock() {
+  inventory.forEach(item => {
+    if ((Number(item.stock) || 0) <= (Number(item.minStock) || 0)) {
+      item.stock = item.optimalStock || (item.minStock * 2.5);
+    }
+  });
+  playScannerSound('ok');
+  saveState();
+  showToast('📥 Pedidos recibidos en cámara', 'Todos los ingredientes bajo mínimo se han repuesto.');
+}
+
+function updateYieldCalc() {
+  const sel = document.getElementById('yieldIngSelect');
+  const gross = parseFloat(document.getElementById('yieldGrossInput').value) || 0;
+  const pct = parseFloat(document.getElementById('yieldPctInput').value) || 62;
+  const net = Math.round(gross * (pct / 100));
+  const waste = gross - net;
+  document.getElementById('yieldSummaryBanner').innerHTML =
+    `De <strong>${gross} g brutos</strong> comprados entran <strong>+${net} g netos de lomo Saku limpio</strong> al inventario (merma de limpieza: ${waste} g).`;
+}
+
+document.getElementById('yieldIngSelect').addEventListener('change', function() {
+  const y = this.options[this.selectedIndex].getAttribute('data-yield');
+  if (y) document.getElementById('yieldPctInput').value = y;
+  updateYieldCalc();
+});
+
+function applyYieldToInventory() {
+  const ingId = document.getElementById('yieldIngSelect').value;
+  const gross = parseFloat(document.getElementById('yieldGrossInput').value) || 0;
+  const pct = parseFloat(document.getElementById('yieldPctInput').value) || 62;
+  const net = Math.round(gross * (pct / 100));
+  const item = inventory.find(i => i.id === ingId);
+  if (item && net > 0) {
+    item.stock = (Number(item.stock) || 0) + net;
+    playScannerSound('ok');
+    saveState();
+    showToast(`🔪 +${net} g limpios añadidos`, `${item.name} actualizado tras limpieza.`);
+  }
+}
+
+// ============================================================================
+// 13. CONTROLES DE NAVEGACIÓN, SIMULACIÓN Y KPIs GLOBALES
+// ============================================================================
+function switchAppModule(modName) {
+  ['scanner', 'labels', 'suppliers', 'api'].forEach(m => {
+    document.getElementById('mod-' + m).classList.toggle('active', m === modName);
+    document.getElementById('tab-btn-' + m).classList.toggle('active', m === modName);
+  });
+}
+
+function setStageLayout(mode, btn) {
+  document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const stage = document.getElementById('mainStage');
+  const colApp = document.getElementById('colApp');
+  const colTsuki = document.getElementById('colTsuki');
+
+  stage.classList.remove('single-app', 'single-tsuki');
+  if (mode === 'both') {
+    colApp.style.display = 'block';
+    colTsuki.style.display = 'block';
+  } else if (mode === 'app') {
+    stage.classList.add('single-app');
+    colApp.style.display = 'block';
+    colTsuki.style.display = 'none';
+  } else {
+    stage.classList.add('single-tsuki');
+    colApp.style.display = 'none';
+    colTsuki.style.display = 'block';
+  }
+}
+
+function simulateDepleteSalmon() {
+  const sal = inventory.find(i => i.id === 'salmon');
+  if (!sal) return;
+  undoStack.push({ changes: [{ id: 'salmon', prevStock: sal.stock }], wasWaste: false });
+  sal.stock = 20; // Menos de los 35g/65g requeridos por platos de salmón
+  playScannerSound('warn');
+  prependScanLog({
+    time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    code: 'SIM-SALMON',
+    title: '⚠️ Simulación de Rotura de Stock · Salmón en 20 g',
+    detail: 'Mira la columna derecha: los platos con salmón se han bloqueado automáticamente en la Carta de Tsukihana y se ha activado el pedido por WhatsApp a Lonja de Vigo.',
+    status: 'warn'
+  });
+  saveState();
+  showToast('🔴 Salmón agotado (20 g)', 'Platos con salmón bloqueados en la Carta de Tsukihana y alerta WhatsApp lista.');
+}
+
+function resetAllStock() {
+  localStorage.removeItem('tsukihana_inventory_v1');
+  loadState();
+  wasteEurToday = 0;
+  playScannerSound('ok');
+  saveState();
+  showToast('↺ Stock inicial restaurado', 'Todos los niveles de inventario de Tsukihana están al 100%.');
+}
+
+function exportStockCSV() {
+  const headers = ['ID', 'Ingrediente', 'Familia', 'Conservacion', 'Stock', 'Unidad', 'Minimo', 'Valor_EUR'];
+  const rows = inventory.map(i => [
+    i.id, `"${i.name}"`, `"${i.category}"`, `"${i.storage}"`,
+    i.stock, i.unit, i.minStock, ((i.stock || 0) * (i.costPerUnit || 0)).toFixed(2)
+  ].join(';'));
+  const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ScanStock_Inventario_Tsukihana.csv';
+  a.click();
+}
+
+function refreshKPIs() {
+  const fishIds = ['salmon', 'atun', 'butterfish', 'vieira', 'langostino'];
+  const totalFish = inventory.filter(i => fishIds.includes(i.id)).reduce((acc, i) => acc + (Number(i.stock) || 0), 0);
+  const totalEur = inventory.reduce((acc, i) => acc + ((Number(i.stock) || 0) * (Number(i.costPerUnit) || 0)), 0);
+
+  document.getElementById('kpiTotalFish').textContent = `${totalFish.toLocaleString('es-ES')} g`;
+  document.getElementById('kpiScansCount').textContent = scanCountToday;
+  document.getElementById('kpiInventoryEur').textContent = `${totalEur.toFixed(2).replace('.', ',')} €`;
+  document.getElementById('kpiWasteEur').textContent = `Merma hoy: ${wasteEurToday.toFixed(2).replace('.', ',')} €`;
+}
+
+function renderA4StickerSheet() {
+  const grid = document.getElementById('a4StickerSheetGrid');
+  if (!grid) return;
+  const all = getAllBarcodes().slice(0, 12);
+  grid.innerHTML = all.map(b => `
+    <div style="border:1.5px solid #1b0c29;border-radius:10px;padding:10px;background:#fff;cursor:pointer;" onclick="executeBarcodeScan('${b.code}')">
+      <div style="display:flex;justify-content:space-between;font-size:9.5px;font-weight:800;border-bottom:1px solid #000;padding-bottom:3px;margin-bottom:5px;">
+        <span>TSUKIHANA 月花</span>
+        <span>${b.mode === 'dish' ? 'MODO 2 · CAJA' : 'MODO 1 · APPCC'}</span>
+      </div>
+      <strong style="font-size:12px;display:block;color:#000;">${b.title}</strong>
+      <div style="font-size:10.5px;color:#444;margin-bottom:6px;">${b.subtitle}</div>
+      <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:6px;padding:4px;text-align:center;font-family:var(--font-mono);font-size:11px;font-weight:800;letter-spacing:2px;">
+        ||| || ||| | || ${b.code}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLiveFoodCostTable() {
+  const tbody = document.getElementById('liveFoodCostTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = DISH_RECIPES.map(dish => {
+    let mpCost = 0;
+    Object.entries(dish.ingredients).forEach(([ingId, qty]) => {
+      const inv = inventory.find(i => i.id === ingId);
+      if (inv) mpCost += qty * (inv.costPerUnit || 0);
+    });
+    const fcPct = (mpCost / dish.price) * 100;
+    const marginEur = dish.price - mpCost;
+    const avail = calculateDishAvailability(dish);
+    return `
+      <tr>
+        <td style="font-family:var(--font-mono);font-weight:800;color:var(--fuchsia-600);">[${dish.code}]</td>
+        <td><strong>${dish.name}</strong></td>
+        <td style="font-family:var(--font-mono);font-weight:700;">${mpCost.toFixed(2).replace('.', ',')} €</td>
+        <td style="font-family:var(--font-mono);font-weight:800;">${dish.price.toFixed(2).replace('.', ',')} €</td>
+        <td><span class="status-pill ${fcPct <= 30 ? 'st-ok' : 'st-warn'}">${fcPct.toFixed(1)}% FC</span></td>
+        <td style="font-family:var(--font-mono);font-weight:800;color:#047857;">+${marginEur.toFixed(2).replace('.', ',')} €</td>
+        <td>
+          <span class="status-pill ${avail.maxUnits > 0 ? 'st-ok' : 'st-bad'}">
+            ${avail.maxUnits > 0 ? `🟢 ${avail.maxUnits} disp.` : '🔴 Agotado'}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function refreshAllViews() {
+  renderBarcodeCards();
+  renderInventoryTable();
+  renderLiveTsukihanaMenu();
+  renderSuppliersAndAlerts();
+  renderA4StickerSheet();
+  renderLiveFoodCostTable();
+  refreshKPIs();
+}
+
+// Inicialización
+loadState();
+populateLabelTargetOptions();
+updateDynamicScaleCode();
+updateYieldCalc();
+refreshAllViews();
+prependScanLog({
+  time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+  code: 'READY',
+  title: '✓ ScanStock OS conectado en vivo con Tsukihana y Resérvalo',
+  detail: 'Haz clic en cualquier etiqueta de código de barras arriba o usa el botón «Simular Fin de Salmón» para ver el bloqueo automático de platos en la carta.',
+  status: 'ok'
+});
+</script>
+</body>
+</html>

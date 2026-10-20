@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsukihana · 02 Calculadora de Escandallos, Precios y Carta</title>
+<style>
+  :root {
+    --purple-deep: #140b24;
+    --purple-royal: #271447;
+    --purple-mid: #4c2382;
+    --purple-accent: #7c3aed;
+    --purple-soft: #ede4ff;
+    --paper: #f6f4f9;
+    --ink: #120e1a;
+    --muted: #5e546e;
+    --line: rgba(76, 35, 130, 0.15);
+    --ok-bg: #dcfce7;
+    --ok-txt: #14532d;
+    --warn-bg: #fef3c7;
+    --warn-txt: #92400e;
+    --bad-bg: #fee2e2;
+    --bad-txt: #991b1b;
+  }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: var(--paper); color: var(--ink); padding: 20px; }
+
+  .top-nav {
+    background: #0d0718; color: #fff; padding: 10px 18px; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 16px; font-size: 12.5px;
+  }
+  .tool-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tool-links a {
+    color: #e9d5ff; text-decoration: none; padding: 5px 10px; border-radius: 7px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-weight: 600;
+  }
+  .tool-links a.active, .tool-links a:hover { background: var(--purple-soft); color: var(--purple-deep); }
+
+  .header {
+    background: linear-gradient(135deg, var(--purple-deep), var(--purple-royal));
+    color: #fff; border-radius: 18px; padding: 22px 26px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 18px; box-shadow: 0 12px 28px rgba(20, 11, 36, 0.16);
+  }
+  .header h1 { margin: 0 0 6px 0; font-size: 22px; letter-spacing: -0.02em; }
+  .header p { margin: 0; color: rgba(255,255,255,0.82); font-size: 13.5px; }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    background: #e9d5ff; color: var(--purple-deep); font-weight: 700; padding: 9px 14px;
+    border-radius: 10px; font-size: 12.5px; border: none; cursor: pointer; text-decoration: none;
+  }
+  .btn:hover { background: #fff; }
+  .btn.secondary { background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
+
+  /* KPIs & PARÁMETROS BASE */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+  }
+  .kpi-card .num { font-size: 23px; font-weight: 800; color: var(--purple-deep); }
+  .kpi-card .lbl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+  .params-box {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; margin-bottom: 16px;
+  }
+  .params-title {
+    font-size: 13px; font-weight: 800; color: var(--purple-deep); text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+  .params-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+  }
+  .param-field label { display: block; font-size: 11.5px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+  .param-field input {
+    width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); font-weight: 700; font-size: 13.5px;
+  }
+
+  /* CONTROLES DE FILTRO Y AÑADIR PLATO */
+  .controls {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center;
+    background: #fff; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line);
+  }
+  .controls input, .controls select {
+    padding: 8px 12px; border-radius: 9px; border: 1px solid var(--line); font-size: 13.5px;
+  }
+  .controls input { flex: 1; min-width: 200px; }
+
+  /* TABLA ESCANDALLOS */
+  .table-wrap {
+    background: #fff; border-radius: 16px; border: 1px solid var(--line); overflow-x: auto;
+    box-shadow: 0 6px 20px rgba(20, 11, 36, 0.05);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: var(--purple-deep); color: #fff; text-align: left; padding: 11px 10px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+  }
+  td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:hover td { background: #faf8fc; }
+
+  .inp-name { width: 100%; min-width: 180px; font-weight: 700; border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; font-size: 13px; color: var(--purple-deep); margin-bottom: 5px; }
+  .inp-desc { width: 100%; min-width: 210px; min-height: 48px; border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; font-size: 12px; color: var(--muted); resize: vertical; }
+  .inp-num { width: 76px; padding: 6px 7px; border-radius: 7px; border: 1px solid var(--line); font-weight: 700; font-size: 12.5px; text-align: right; }
+  .inp-cat { padding: 6px 8px; border-radius: 7px; border: 1px solid var(--line); font-weight: 700; font-size: 12px; }
+
+  .fc-pill {
+    display: inline-block; padding: 4px 8px; border-radius: 99px; font-weight: 800; font-size: 11.5px;
+  }
+  .fc-good { background: var(--ok-bg); color: var(--ok-txt); }
+  .fc-warn { background: var(--warn-bg); color: var(--warn-txt); }
+  .fc-bad { background: var(--bad-bg); color: var(--bad-txt); }
+
+  .allergen-mini-grid {
+    display: flex; flex-wrap: wrap; gap: 4px; max-width: 210px;
+  }
+  .al-toggle {
+    font-size: 11px; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--line);
+    background: #f5f3f7; cursor: pointer; user-select: none; opacity: 0.45;
+  }
+  .al-toggle.on {
+    opacity: 1; background: var(--purple-soft); border-color: var(--purple-accent); font-weight: 700;
+  }
+
+  /* MODAL EXPORTAR CÓDIGO */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(20, 11, 36, 0.6); z-index: 999;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal {
+    background: #fff; max-width: 760px; width: 100%; border-radius: 18px; padding: 24px;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  }
+  pre {
+    background: #140b24; color: #e9d5ff; padding: 16px; border-radius: 12px; overflow-x: auto; font-size: 12px;
+  }
+
+  @media print {
+    .top-nav, .header-actions, .controls { display: none !important; }
+    body { background: #fff; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div><strong>TSUKIHANA · HERRAMIENTA OPERATIVA 02</strong> · Conectada en vivo con Vista Web (01)</div>
+  <div class="tool-links">
+    <a href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a href="index.html">🌸 Web Clientes</a> 
+    <a href="01_Vista_Previa_Interactiva_Tsukihana.html">🌸 01 Home Page</a>
+    <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">📖 05 Página Carta</a>
+    <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">⚖️ 06 Inventario y Gramaje</a>
+    <a class="active" href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html">🧮 02 Escandallos y Carta</a>
+    <a href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">📄 03 Dossier A4</a>
+    <a href="04_Cabina_Operativa_Pedidos_y_Lanzamiento_Tsukihana.html">🍱 04 Cabina Operativa</a>
+  </div>
+</div>
+
+<div class="header">
+  <div>
+    <h1>🧮 Tsukihana · Calculadora de Escandallos, Precios y Alérgenos de Carta</h1>
+    <p>Ajusta costes de pescado, shari y packaging en Vigo. Los cambios se sincronizan automáticamente con la Vista Web (01).</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="addNewDish()">➕ Añadir Plato / Pack</button>
+    <button class="btn" onclick="exportTypeScriptModal()">📦 Generar Código Web (menu.ts)</button>
+    <button class="btn secondary" onclick="exportCSV()">⬇️ Exportar Excel (CSV)</button>
+    <button class="btn secondary" onclick="window.print()">🖨️ Exportar a PDF</button>
+    <button class="btn secondary" onclick="resetDefaults()">↺ Restaurar Base</button>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="num" id="kpiTotalDishes">0</div>
+    <div class="lbl">Platos / Packs en Carta</div>
+  </div>
+  <div class="kpi-card">
+    <div class="num" id="kpiPublicReady">0</div>
+    <div class="lbl">Publicables (Verificados)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="num" id="kpiAvgFoodCost">0 %</div>
+    <div class="lbl">Food Cost Medio Carta</div>
+  </div>
+  <div class="kpi-card">
+    <div class="num" id="kpiAvgMargin">0,00 €</div>
+    <div class="lbl">Margen Bruto Medio / Plato</div>
+  </div>
+  <div class="kpi-card">
+    <div class="num" id="kpiAvgTicket">0,00 €</div>
+    <div class="lbl">PVP Medio Con IVA (10%)</div>
+  </div>
+</div>
+
+<!-- PARÁMETROS GLOBALES Y REFERENCIA DE MATERIA PRIMA -->
+<div class="params-box">
+  <div class="params-title">
+    <span>⚙️ Parámetros de Rentabilidad y Costes de Referencia (Vigo · Editable)</span>
+    <span style="font-size:11.5px;color:var(--muted);font-weight:500;">El PVP Sugerido se calcula como: (Coste Materia Prima + Packaging) ÷ (% Food Cost Objetivo) × (1 + % IVA)</span>
+  </div>
+  <div class="params-grid">
+    <div class="param-field">
+      <label>🎯 Food Cost Objetivo (%)</label>
+      <input type="number" id="targetFC" value="28" step="1" min="15" max="60" onchange="recalcAll()">
+    </div>
+    <div class="param-field">
+      <label>🧾 IVA Hostelería (%)</label>
+      <input type="number" id="vatRate" value="10" step="1" onchange="recalcAll()">
+    </div>
+    <div class="param-field">
+      <label>🌾 Arroz Shari cocido (€/kg)</label>
+      <input type="number" id="refShari" value="2.40" step="0.10" onchange="updateReferenceHelper()">
+    </div>
+    <div class="param-field">
+      <label>🐟 Salmón limpio neto (€/kg)</label>
+      <input type="number" id="refSalmon" value="19.50" step="0.50" onchange="updateReferenceHelper()">
+    </div>
+    <div class="param-field">
+      <label>🍣 Atún Rojo limpio neto (€/kg)</label>
+      <input type="number" id="refTuna" value="32.00" step="0.50" onchange="updateReferenceHelper()">
+    </div>
+    <div class="param-field">
+      <label>📦 Caja + Palillos + Soja (€/ud)</label>
+      <input type="number" id="refPack" value="0.85" step="0.05" onchange="updateReferenceHelper()">
+    </div>
+  </div>
+  <div id="refSummary" style="margin-top:10px;font-size:12px;color:var(--purple-mid);background:var(--purple-soft);padding:8px 12px;border-radius:8px;font-weight:600;"></div>
+</div>
+
+<!-- FILTROS -->
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre de pieza, ingrediente o categoría..." oninput="renderTable()">
+  <select id="catFilter" onchange="renderTable()">
+    <option value="todos">Todas las categorías (6)</option>
+    <option value="packs">🍱 Packs</option>
+    <option value="nigiris">🍣 Nigiris</option>
+    <option value="uramakis">🌀 Uramakis</option>
+    <option value="makis">🎋 Makis</option>
+    <option value="gunkans">👑 Gunkans</option>
+    <option value="extras">🥢 Extras</option>
+  </select>
+  <button class="btn" style="background:var(--purple-deep);color:#fff;" onclick="applySuggestedPricesToAll()">⚡ Aplicar PVP Sugerido a toda la carta</button>
+</div>
+
+<!-- TABLA MAESTRA DE ESCANDALLOS -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Categoría / Piezas</th>
+        <th>Nombre del Plato y Descripción en Carta</th>
+        <th>Coste Mat. Prima (€)</th>
+        <th>Coste Envase (€)</th>
+        <th>Coste Total (€)</th>
+        <th>PVP Sugerido</th>
+        <th>PVP Carta (€ IVA inc.)</th>
+        <th>Margen Neto & Food Cost</th>
+        <th>Alérgenos Oficiales (Clic para marcar)</th>
+        <th>Estado Web</th>
+      </tr>
+    </thead>
+    <tbody id="escandalloBody"></tbody>
+  </table>
+</div>
+
+<!-- MODAL TYPESCRIPT / JSON -->
+<div class="modal-bg" id="codeModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <h2 style="margin-top:0;color:var(--purple-deep);">📦 Código Listo para `tsukihana-web/src/data/menu.ts`</h2>
+    <p style="font-size:13.5px;color:var(--muted);">Copia este bloque cuando quieras pasar tu carta definitiva al proyecto Next.js:</p>
+    <pre id="codeOutput"></pre>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('codeOutput').textContent);alert('¡Código copiado al portapapeles!')">📋 Copiar Código</button>
+      <button class="btn secondary" style="color:var(--ink);" onclick="document.getElementById('codeModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALLERGENS = [
+  { id: 'pescado', name: 'Pescado', icon: '🐟' },
+  { id: 'soja', name: 'Soja', icon: '🫘' },
+  { id: 'sesamo', name: 'Sésamo', icon: '🌾' },
+  { id: 'gluten', name: 'Gluten', icon: '🍞' },
+  { id: 'crustaceos', name: 'Crustáceos', icon: '🦐' },
+  { id: 'moluscos', name: 'Moluscos', icon: '🦪' },
+  { id: 'huevo', name: 'Huevo', icon: '🥚' },
+  { id: 'lacteos', name: 'Lácteos', icon: '🥛' },
+  { id: 'mostaza', name: 'Mostaza', icon: '🌭' },
+  { id: 'frutos_secos', name: 'Frutos secos', icon: '🌰' }
+];
+
+const INITIAL_ITEMS = [
+  {
+    id: 'pack-tsukihana-16',
+    name: 'Box Tsukihana Selección (16 pzs)',
+    category: 'packs',
+    pieces: 16,
+    description: 'Recorrido equilibrado del chef: 4 nigiris de autor (salmón aburi, atún, pez mantequilla trufado, langostino), 8 uramakis de la casa y 4 hosomakis clásicos.',
+    rawCost: 5.65,
+    packCost: 1.25,
+    priceEur: 26.50,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo', 'gluten', 'crustaceos'],
+    isSignature: true
+  },
+  {
+    id: 'pack-luna-llena-32',
+    name: 'Box Luna Llena Compartir (32 pzs)',
+    category: 'packs',
+    pieces: 32,
+    description: 'Pensado para 2-3 personas: 8 nigiris clásicos y flambeados, 16 uramakis equilibrados (2 variedades), 4 makis y 4 gunkans de tartar.',
+    rawCost: 11.10,
+    packCost: 1.85,
+    priceEur: 49.00,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo', 'gluten', 'crustaceos', 'huevo'],
+    isSignature: true
+  },
+  {
+    id: 'nigiri-salmon-aburi',
+    name: 'Nigiri Sake Aburi con Lima y Miso Dulce (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    description: 'Lomo de salmón noruego ligeramente flambeado a soplete para fundir su infiltración, glaseado sutil de miso y ralladura de lima fresca.',
+    rawCost: 1.05,
+    packCost: 0.35,
+    priceEur: 5.20,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo'],
+    isSignature: true
+  },
+  {
+    id: 'nigiri-maguro-nikiri',
+    name: 'Nigiri Maguro con Soja Nikiri Envejecida (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    description: 'Corte limpio de atún rojo sobre shari templado, pincelado con reducción casera nikiri y un toque de wasabi fresco.',
+    rawCost: 1.42,
+    packCost: 0.35,
+    priceEur: 6.40,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'gluten'],
+    isSignature: false
+  },
+  {
+    id: 'nigiri-butterfish-trufa',
+    name: 'Nigiri Pez Mantequilla Aburi & Trufa Negra (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    description: 'Textura sedosa flambeada al instante con paté de trufa negra, cebollino fino y escama de sal marina.',
+    rawCost: 1.18,
+    packCost: 0.35,
+    priceEur: 5.80,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja'],
+    isSignature: true
+  },
+  {
+    id: 'uramaki-tsukihana',
+    name: 'Uramaki Tsukihana (Salmón, Aguacate y Tartar Suave · 8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    description: 'Interior de aguacate cremoso y pepino crujiente, cubierto de láminas de salmón y coronado con tartar especiado japonés y sésamo tostado.',
+    rawCost: 3.10,
+    packCost: 0.65,
+    priceEur: 13.80,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo', 'huevo'],
+    isSignature: true
+  },
+  {
+    id: 'uramaki-ebi-crunch',
+    name: 'Uramaki Ebi Tempura & Mango Equilibrado (8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    description: 'Langostino crujiente, aguacate y contrapunto fresco de mango, terminado con emulsión suave de kimchi y tare artesanal.',
+    rawCost: 2.95,
+    packCost: 0.65,
+    priceEur: 13.50,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['crustaceos', 'gluten', 'soja', 'sesamo', 'huevo'],
+    isSignature: false
+  },
+  {
+    id: 'maki-sake-hoso',
+    name: 'Hosomaki Puro de Salmón o Atún (6 pzs)',
+    category: 'makis',
+    pieces: 6,
+    description: 'La prueba de precisión del sushi clásico: alga nori crujiente, shari aireado y corte central de pescado fresco.',
+    rawCost: 1.25,
+    packCost: 0.45,
+    priceEur: 6.20,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado'],
+    isSignature: false
+  },
+  {
+    id: 'gunkan-spicy-tuna',
+    name: 'Gunkan de Tartar de Atún, Yema Curada y Cebollino (2 pzs)',
+    category: 'gunkans',
+    pieces: 2,
+    description: 'Bocado intenso de atún picado a cuchillo con aceite de sésamo tostado y emulsión sedosa de yema.',
+    rawCost: 1.55,
+    packCost: 0.35,
+    priceEur: 6.80,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo', 'huevo'],
+    isSignature: true
+  },
+  {
+    id: 'extra-gyozas-edamame',
+    name: 'Edamame al Vapor con Sal en Escamas o Kimchi Suave',
+    category: 'extras',
+    pieces: 1,
+    description: 'Vainas de soja tiernas salteadas al wok o al vapor para abrir el apetito antes del sushi.',
+    rawCost: 0.85,
+    packCost: 0.35,
+    priceEur: 4.50,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['soja', 'sesamo'],
+    isSignature: false
+  }
+];
+
+let menuData = [];
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem('tsukihana_menu_items_v1');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        menuData = parsed.map((item, idx) => ({
+          ...item,
+          rawCost: item.rawCost !== undefined ? item.rawCost : (INITIAL_ITEMS[idx]?.rawCost || 2.0),
+          packCost: item.packCost !== undefined ? item.packCost : (INITIAL_ITEMS[idx]?.packCost || 0.5)
+        }));
+        return;
+      }
+    }
+  } catch (e) {}
+  menuData = JSON.parse(JSON.stringify(INITIAL_ITEMS));
+}
+
+function saveData() {
+  localStorage.setItem('tsukihana_menu_items_v1', JSON.stringify(menuData));
+  updateKPIs();
+}
+
+function calcSuggestedPrice(totalCost) {
+  const targetFC = (parseFloat(document.getElementById('targetFC').value) || 28) / 100;
+  const vat = (parseFloat(document.getElementById('vatRate').value) || 10) / 100;
+  const netSuggested = totalCost / targetFC;
+  return netSuggested * (1 + vat);
+}
+
+function updateReferenceHelper() {
+  const shariKg = parseFloat(document.getElementById('refShari').value) || 2.4;
+  const salmonKg = parseFloat(document.getElementById('refSalmon').value) || 19.5;
+  const tunaKg = parseFloat(document.getElementById('refTuna').value) || 32.0;
+
+  const nigiriSalmon2pzs = (0.036 * shariKg) + (0.036 * salmonKg) + 0.08;
+  const nigiriTuna2pzs = (0.036 * shariKg) + (0.036 * tunaKg) + 0.10;
+  const uramaki8pzs = (0.130 * shariKg) + (0.095 * salmonKg) + 0.55;
+
+  document.getElementById('refSummary').innerHTML =
+    `💡 <strong>Referencia rápida de coste de materia prima según tus precios actuales:</strong> ` +
+    `2 Nigiris Salmón (36g arroz + 36g salmón) ≈ <strong>${nigiriSalmon2pzs.toFixed(2)} €</strong> · ` +
+    `2 Nigiris Atún ≈ <strong>${nigiriTuna2pzs.toFixed(2)} €</strong> · ` +
+    `Rollo Uramaki 8 pzs (130g arroz + 95g pescado/relleno) ≈ <strong>${uramaki8pzs.toFixed(2)} €</strong>`;
+}
+
+function updateKPIs() {
+  const vat = (parseFloat(document.getElementById('vatRate').value) || 10) / 100;
+  const total = menuData.length;
+  const pub = menuData.filter(i => i.isAvailable && i.allergensVerified).length;
+
+  let sumFC = 0, sumMargin = 0, sumPVP = 0;
+  menuData.forEach(item => {
+    const cost = (Number(item.rawCost) || 0) + (Number(item.packCost) || 0);
+    const pvp = Number(item.priceEur) || 0;
+    const netPrice = pvp / (1 + vat);
+    const fc = netPrice > 0 ? (cost / netPrice) * 100 : 0;
+    sumFC += fc;
+    sumMargin += (netPrice - cost);
+    sumPVP += pvp;
+  });
+
+  document.getElementById('kpiTotalDishes').textContent = total;
+  document.getElementById('kpiPublicReady').textContent = `${pub} / ${total}`;
+  document.getElementById('kpiAvgFoodCost').textContent = total ? (sumFC / total).toFixed(1) + ' %' : '0 %';
+  document.getElementById('kpiAvgMargin').textContent = total ? (sumMargin / total).toFixed(2).replace('.', ',') + ' €' : '0,00 €';
+  document.getElementById('kpiAvgTicket').textContent = total ? (sumPVP / total).toFixed(2).replace('.', ',') + ' €' : '0,00 €';
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const vat = (parseFloat(document.getElementById('vatRate').value) || 10) / 100;
+  const tbody = document.getElementById('escandalloBody');
+
+  tbody.innerHTML = menuData.map((item, idx) => {
+    if (cat !== 'todos' && item.category !== cat) return '';
+    if (q && !(item.name.toLowerCase().includes(q) || item.description.toLowerCase().includes(q))) return '';
+
+    const raw = Number(item.rawCost) || 0;
+    const pack = Number(item.packCost) || 0;
+    const totalCost = raw + pack;
+    const suggestedPVP = calcSuggestedPrice(totalCost);
+    const pvp = Number(item.priceEur) || 0;
+    const netSale = pvp / (1 + vat);
+    const marginEur = netSale - totalCost;
+    const fcPct = netSale > 0 ? (totalCost / netSale) * 100 : 0;
+
+    let fcClass = 'fc-good';
+    if (fcPct > 35) fcClass = 'fc-bad';
+    else if (fcPct > 30) fcClass = 'fc-warn';
+
+    const allergenButtons = ALLERGENS.map(a => {
+      const has = (item.allergens || []).includes(a.id);
+      return `<span class="al-toggle ${has ? 'on' : ''}" onclick="toggleDishAllergen(${idx}, '${a.id}')" title="${a.name}">${a.icon} ${a.name}</span>`;
+    }).join('');
+
+    return `
+      <tr>
+        <td>
+          <select class="inp-cat" onchange="updateField(${idx}, 'category', this.value)">
+            <option value="packs" ${item.category==='packs'?'selected':''}>🍱 Packs</option>
+            <option value="nigiris" ${item.category==='nigiris'?'selected':''}>🍣 Nigiris</option>
+            <option value="uramakis" ${item.category==='uramakis'?'selected':''}>🌀 Uramakis</option>
+            <option value="makis" ${item.category==='makis'?'selected':''}>🎋 Makis</option>
+            <option value="gunkans" ${item.category==='gunkans'?'selected':''}>👑 Gunkans</option>
+            <option value="extras" ${item.category==='extras'?'selected':''}>🥢 Extras</option>
+          </select>
+          <div style="margin-top:6px;font-size:11.5px;color:var(--muted);">
+            Piezas: <input type="number" class="inp-num" style="width:52px;" value="${item.pieces || 1}" onchange="updateField(${idx}, 'pieces', parseInt(this.value)||1)">
+          </div>
+          <label style="display:block;margin-top:6px;font-size:11px;cursor:pointer;">
+            <input type="checkbox" ${item.isSignature ? 'checked' : ''} onchange="updateField(${idx}, 'isSignature', this.checked)"> ★ Especialidad
+          </label>
+        </td>
+        <td>
+          <input type="text" class="inp-name" value="${item.name}" onchange="updateField(${idx}, 'name', this.value)">
+          <textarea class="inp-desc" onchange="updateField(${idx}, 'description', this.value)">${item.description}</textarea>
+        </td>
+        <td>
+          <input type="number" step="0.05" class="inp-num" value="${raw.toFixed(2)}" onchange="updateField(${idx}, 'rawCost', parseFloat(this.value)||0)"> €
+        </td>
+        <td>
+          <input type="number" step="0.05" class="inp-num" value="${pack.toFixed(2)}" onchange="updateField(${idx}, 'packCost', parseFloat(this.value)||0)"> €
+        </td>
+        <td style="font-weight:800;color:var(--purple-deep);white-space:nowrap;">
+          ${totalCost.toFixed(2)} €
+          <div style="font-size:10.5px;color:var(--muted);font-weight:500;">${item.pieces ? (totalCost / item.pieces).toFixed(2) + ' €/pza' : ''}</div>
+        </td>
+        <td style="white-space:nowrap;">
+          <strong style="color:var(--purple-mid);">${suggestedPVP.toFixed(2)} €</strong>
+          <div><button onclick="updateField(${idx}, 'priceEur', ${suggestedPVP.toFixed(2)})" style="margin-top:4px;font-size:10.5px;padding:2px 6px;border-radius:5px;border:1px solid var(--line);background:var(--purple-soft);cursor:pointer;font-weight:700;">Usar este</button></div>
+        </td>
+        <td>
+          <input type="number" step="0.10" class="inp-num" style="border-color:var(--purple-accent);background:#faf5ff;" value="${pvp.toFixed(2)}" onchange="updateField(${idx}, 'priceEur', parseFloat(this.value)||0)"> €
+        </td>
+        <td style="white-space:nowrap;">
+          <span class="fc-pill ${fcClass}">${fcPct.toFixed(1)}% FC</span>
+          <div style="margin-top:5px;font-weight:700;color:#14532d;">+${marginEur.toFixed(2)} € limpio</div>
+        </td>
+        <td>
+          <div class="allergen-mini-grid">${allergenButtons}</div>
+        </td>
+        <td style="white-space:nowrap;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#14532d;cursor:pointer;margin-bottom:4px;">
+            <input type="checkbox" ${item.allergensVerified ? 'checked' : ''} onchange="updateField(${idx}, 'allergensVerified', this.checked)"> Alérgenos OK
+          </label>
+          <label style="display:block;font-size:11.5px;font-weight:700;color:var(--purple-deep);cursor:pointer;margin-bottom:6px;">
+            <input type="checkbox" ${item.isAvailable ? 'checked' : ''} onchange="updateField(${idx}, 'isAvailable', this.checked)"> Disponible
+          </label>
+          <button onclick="deleteDish(${idx})" style="font-size:11px;color:#991b1b;background:none;border:none;cursor:pointer;padding:0;">🗑️ Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateKPIs();
+}
+
+function updateField(idx, field, val) {
+  menuData[idx][field] = val;
+  saveData();
+  renderTable();
+}
+
+function toggleDishAllergen(idx, allergenId) {
+  const arr = menuData[idx].allergens || [];
+  const pos = arr.indexOf(allergenId);
+  if (pos >= 0) arr.splice(pos, 1);
+  else arr.push(allergenId);
+  menuData[idx].allergens = arr;
+  saveData();
+  renderTable();
+}
+
+function recalcAll() {
+  renderTable();
+}
+
+function applySuggestedPricesToAll() {
+  menuData.forEach(item => {
+    const totalCost = (Number(item.rawCost) || 0) + (Number(item.packCost) || 0);
+    item.priceEur = Number((Math.round(calcSuggestedPrice(totalCost) * 10) / 10).toFixed(2));
+  });
+  saveData();
+  renderTable();
+}
+
+function addNewDish() {
+  menuData.unshift({
+    id: 'plato-' + Date.now(),
+    name: 'Nueva Creación Tsukihana (8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    description: 'Descripción de ingredientes, corte y técnica culinaria...',
+    rawCost: 2.80,
+    packCost: 0.65,
+    priceEur: 13.50,
+    isAvailable: true,
+    allergensVerified: true,
+    allergens: ['pescado', 'soja', 'sesamo'],
+    isSignature: false
+  });
+  saveData();
+  renderTable();
+}
+
+function deleteDish(idx) {
+  if (confirm('¿Eliminar este plato de la carta?')) {
+    menuData.splice(idx, 1);
+    saveData();
+    renderTable();
+  }
+}
+
+function resetDefaults() {
+  if (confirm('¿Restaurar los platos y escandallos iniciales de referencia?')) {
+    localStorage.removeItem('tsukihana_menu_items_v1');
+    loadData();
+    renderTable();
+  }
+}
+
+function exportTypeScriptModal() {
+  const cleanForWeb = menuData.map(({ rawCost, packCost, ...rest }) => rest);
+  const code = `import { MenuItem } from '@/types/tsukihana';\n\nexport const TSUKIHANA_MENU: MenuItem[] = ${JSON.stringify(cleanForWeb, null, 2)};\n`;
+  document.getElementById('codeOutput').textContent = code;
+  document.getElementById('codeModal').style.display = 'flex';
+}
+
+function exportCSV() {
+  const headers = ['ID','Categoria','Nombre','Piezas','Coste_Materia_Prima','Coste_Packaging','Coste_Total','PVP_IVA_Inc','Alergenos','Verificado','Disponible'];
+  const rows = menuData.map(i => {
+    const tc = ((Number(i.rawCost)||0) + (Number(i.packCost)||0)).toFixed(2);
+    return [
+      i.id, i.category, `"${i.name.replace(/"/g, '""')}"`, i.pieces || 1,
+      (Number(i.rawCost)||0).toFixed(2), (Number(i.packCost)||0).toFixed(2), tc,
+      (Number(i.priceEur)||0).toFixed(2), `"${(i.allergens||[]).join(', ')}"`,
+      i.allergensVerified ? 'SI' : 'NO', i.isAvailable ? 'SI' : 'NO'
+    ].join(';');
+  });
+  const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Escandallos_y_Carta_Tsukihana_Vigo.csv';
+  a.click();
+}
+
+loadData();
+updateReferenceHelper();
+renderTable();
+</script>
+</body>
+</html>

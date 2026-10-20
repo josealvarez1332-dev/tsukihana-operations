@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsukihana 月花 · 06 Inventario Fácil, Lector de Barras y Gramaje</title>
+<style>
+  :root {
+    --bg-page: #faf6fd;
+    --white: #ffffff;
+    --purple-deep: #230b3b;
+    --purple-mid: #6d28d9;
+    --purple-soft: #f3e8ff;
+    --pink-main: #db2777;
+    --pink-soft: #fdf2f8;
+    --pink-border: #f5d0fe;
+    --ink: #1e0b30;
+    --muted: #645375;
+    --line: #e9d8f4;
+    --green-bg: #ecfdf5;
+    --green-txt: #047857;
+    --green-border: #a7f3d0;
+    --amber-bg: #fffbeb;
+    --amber-txt: #b45309;
+    --red-bg: #fef2f2;
+    --red-txt: #b91c1c;
+    --grad-brand: linear-gradient(135deg, #db2777 0%, #7c3aed 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-page);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+
+  /* BARRA SUPERIOR */
+  .top-bar {
+    background: var(--purple-deep);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .top-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .top-links a {
+    color: #f5d0fe;
+    text-decoration: none;
+    padding: 7px 13px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .top-links a.active, .top-links a:hover {
+    background: var(--pink-main);
+    color: #fff;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 26px auto 0;
+    padding: 0 20px;
+  }
+
+  /* CABECERA CLARA */
+  .page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .page-head h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--purple-deep);
+  }
+  .page-head p {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .head-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    color: var(--purple-deep);
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .btn.primary {
+    background: var(--grad-brand);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 16px rgba(219, 39, 119, 0.25);
+  }
+
+  /* 4 TARJETAS DE RESUMEN GRANDES Y LEGIBLES */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-box {
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 20px rgba(35,11,59,0.04);
+  }
+  .kpi-box .label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .kpi-box .val {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--purple-deep);
+  }
+  .kpi-box .sub {
+    font-size: 12px;
+    color: var(--pink-main);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* PESTAÑAS GRANDES PARA NAVEGAR SIN RUIDO VISUAL */
+  .section-tabs {
+    display: flex;
+    gap: 8px;
+    background: #fff;
+    padding: 6px;
+    border-radius: 16px;
+    border: 1.5px solid var(--line);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .sec-tab {
+    flex: 1;
+    min-width: 190px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    transition: 0.15s;
+  }
+  .sec-tab.active {
+    background: var(--grad-brand);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25);
+  }
+
+  .view-block { margin-bottom: 28px; }
+  .view-block.hidden { display: none; }
+
+  /* TARJETAS CONTENEDORAS BLANCAS */
+  .white-card {
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 10px 28px rgba(35,11,59,0.04);
+    margin-bottom: 22px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--purple-deep);
+  }
+  .card-header p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* SECCIÓN 1: LECTOR DE CÓDIGO DE BARRAS LIMPIO */
+  .scanner-top-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .scanner-input {
+    flex: 1;
+    min-width: 240px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 2px solid var(--pink-main);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--purple-deep);
+    background: var(--pink-soft);
+    outline: none;
+  }
+  .scanner-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.9fr;
+    gap: 18px;
+  }
+  .scan-group-box {
+    background: var(--bg-page);
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    padding: 16px;
+  }
+  .scan-group-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--purple-deep);
+    margin-bottom: 4px;
+  }
+  .scan-group-sub {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .scan-btn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .scan-item-btn {
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.15s;
+  }
+  .scan-item-btn:hover {
+    border-color: var(--pink-main);
+    background: var(--pink-soft);
+    transform: translateY(-1px);
+  }
+  .scan-item-btn strong {
+    display: block;
+    font-size: 14px;
+    color: var(--purple-deep);
+  }
+  .scan-item-btn span {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .scan-code-tag {
+    background: var(--purple-soft);
+    color: var(--purple-mid);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* CAJA DE ÚLTIMAS LECTURAS */
+  .scan-feed-card {
+    background: var(--purple-deep);
+    color: #fff;
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .feed-item {
+    background: rgba(255,255,255,0.1);
+    border-left: 4px solid #10b981;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .feed-item strong {
+    display: block;
+    color: #a7f3d0;
+    font-size: 13.5px;
+  }
+
+  /* SECCIÓN 2: MI NEVERA Y ALMACÉN (TARJETAS CLARAS EN FILA) */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    font-size: 14px;
+    font-weight: 600;
+    background: #fff;
+  }
+  .filter-bar input { flex: 1; min-width: 240px; }
+
+  .inv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .inv-row-card {
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1.1fr auto;
+    align-items: center;
+    gap: 16px;
+    transition: 0.15s;
+  }
+  .inv-row-card:hover {
+    border-color: var(--pink-border);
+    box-shadow: 0 4px 14px rgba(35,11,59,0.04);
+  }
+  .inv-title strong {
+    display: block;
+    font-size: 15.5px;
+    color: var(--purple-deep);
+    margin-bottom: 2px;
+  }
+  .inv-title span {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .inv-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .inv-progress-track {
+    height: 10px;
+    background: #f3e8ff;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .inv-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.25s;
+  }
+
+  .inv-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .step-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: var(--bg-page);
+    color: var(--purple-deep);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .step-btn:hover {
+    background: var(--pink-main);
+    color: #fff;
+    border-color: var(--pink-main);
+  }
+  .stock-num-input {
+    width: 92px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--purple-mid);
+    font-size: 16px;
+    font-weight: 900;
+    text-align: right;
+    color: var(--purple-deep);
+  }
+  .unit-lbl {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--muted);
+    min-width: 34px;
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .status-ok { background: var(--green-bg); color: var(--green-txt); }
+  .status-warn { background: var(--amber-bg); color: var(--amber-txt); }
+  .status-bad { background: var(--red-bg); color: var(--red-txt); }
+
+  /* SECCIÓN 3: CALCULADORA DE GRAMAJE Y MERMA */
+  .gram-calc-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 22px;
+  }
+  .dish-picker-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .dish-pick-card {
+    background: var(--bg-page);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .dish-pick-card strong {
+    display: block;
+    font-size: 13.5px;
+    color: var(--purple-deep);
+  }
+  .dish-pick-card span {
+    font-size: 11.5px;
+    color: var(--pink-main);
+    font-weight: 700;
+  }
+  .qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qty-round {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .qty-round.plus {
+    background: var(--pink-main);
+    color: #fff;
+    border-color: var(--pink-main);
+  }
+
+  .needed-grams-box {
+    background: var(--pink-soft);
+    border: 2px solid var(--pink-border);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .needed-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  @media (max-width: 960px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .scanner-cols, .gram-calc-grid, .inv-row-card, .dish-picker-list { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR -->
+  <div class="top-bar">
+    <div>🌸 <strong>TSUKIHANA (月花)</strong> · 06 Gestor de Inventario, Lector de Código de Barras y Gramaje</div>
+    <div class="top-links">
+      <a href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a href="index.html">🌸 Web Clientes</a>
+      <a href="01_Vista_Previa_Interactiva_Tsukihana.html">01 · Web Principal</a>
+      <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">05 · Carta</a>
+      <a class="active" href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">06 · Inventario y Lector</a>
+      <a href="07_Integracion_Reservalo_x_Tsukihana_Maqueta.html">07 · Panel Reservas</a>
+      <a href="08_App_Movil_Tsukihana_Maqueta.html">08 · 📱 App Móvil</a>
+      <a href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">03 · Cotizador Eventos</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- CABECERA -->
+    <div class="page-head">
+      <div>
+        <h1>⚖️ Control de Inventario y Lector de Salidas</h1>
+        <p>Vista clara de los gramos disponibles en tu nevera, descuento con lector de código de barras y cálculo por pedido.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn primary" onclick="addNewIngredient()">➕ Añadir Producto</button>
+        <button class="btn" onclick="exportInventoryCSV()">⬇️ Descargar Excel (CSV)</button>
+        <button class="btn" onclick="resetInventory()">↺ Restaurar Stock Inicial</button>
+      </div>
+    </div>
+
+    <!-- 4 INDICADORES GRANDES -->
+    <div class="kpi-row">
+      <div class="kpi-box">
+        <div class="label">🐟 Pescado Limpio en Nevera</div>
+        <div class="val" id="kpiFishGrams">5.720 g</div>
+        <div class="sub">Salmón, Atún, Pez Mant., Vieira y Ebi</div>
+      </div>
+      <div class="kpi-box">
+        <div class="label">🌾 Arroz Japonés en Almacén</div>
+        <div class="val" id="kpiRiceGrams">8.500 g</div>
+        <div class="sub" id="kpiShariEquiv">Equivale a ~17.850 g de Arroz Shari</div>
+      </div>
+      <div class="kpi-box">
+        <div class="label">🍱 Cajas de 16 pzs que puedes hacer</div>
+        <div class="val" id="kpiMaxBoxes">36 Cajas</div>
+        <div class="sub">Según tu stock actual de pescado y arroz</div>
+      </div>
+      <div class="kpi-box">
+        <div class="label">💰 Valor Total de tu Inventario</div>
+        <div class="val" id="kpiStockValue">248,50 €</div>
+        <div class="sub" id="kpiAlerts">🟢 Todo con stock suficiente</div>
+      </div>
+    </div>
+
+    <!-- SELECTOR DE SECCIÓN PARA LEER SIN SATURACIÓN -->
+    <div class="section-tabs">
+      <button class="sec-tab active" onclick="setSectionView('all', this)">👁️ Ver Todo Ordenado</button>
+      <button class="sec-tab" onclick="setSectionView('stock', this)">📦 1. Mi Nevera y Almacén</button>
+      <button class="sec-tab" onclick="setSectionView('scanner', this)">🔫 2. Lector de Código de Barras</button>
+      <button class="sec-tab" onclick="setSectionView('calc', this)">⚖️ 3. Calcular Gramos de un Pedido</button>
+    </div>
+
+    <!-- =========================================================
+         BLOQUE 1: LECTOR DE CÓDIGO DE BARRAS (MUY INTUITIVO)
+         ========================================================= -->
+    <div class="view-block" id="block-scanner">
+      <div class="white-card">
+        <div class="card-header">
+          <div>
+            <h2>🔫 Lector de Código de Barras (Descuento Automático)</h2>
+            <p>Enchufa tu pistola lectora o haz clic directamente en cualquier producto de abajo para descontarlo del stock.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn" id="scanModeBtn" onclick="toggleScanMode()">📤 Modo: SALIDA (− Resta Stock)</button>
+            <button class="btn" onclick="undoLastScan()">↩️ Deshacer última lectura</button>
+          </div>
+        </div>
+
+        <!-- BARRA DE ENTRADA DEL LECTOR -->
+        <div class="scanner-top-bar">
+          <input type="text" id="barcodeInput" class="scanner-input" placeholder="🔫 Pita aquí con el lector o escribe un código (ej. 841001 o 990016) y pulsa Enter..." onkeydown="if(event.key==='Enter') processBarcodeScan(this.value)">
+          <button class="btn primary" onclick="processBarcodeScan(document.getElementById('barcodeInput').value)">Procesar Código</button>
+        </div>
+
+        <!-- 3 COLUMNAS CLARAS: MODO 1, MODO 2 Y REGISTRO -->
+        <div class="scanner-cols">
+
+          <!-- MODO 1: PAQUETES DE NEVERA -->
+          <div class="scan-group-box">
+            <div class="scan-group-title">🐟 Modo 1 · Sacar Paquetes de Cámara</div>
+            <div class="scan-group-sub">Haz clic al sacar un bloque limpio de la nevera:</div>
+            <div class="scan-btn-list" id="rawBarcodeList"></div>
+          </div>
+
+          <!-- MODO 2: CAJAS TERMINADAS -->
+          <div class="scan-group-box">
+            <div class="scan-group-title">🍱 Modo 2 · Salida de Cajas Terminadas</div>
+            <div class="scan-group-sub">Descuenta de golpe todos los ingredientes del plato:</div>
+            <div class="scan-btn-list" id="dishBarcodeList"></div>
+          </div>
+
+          <!-- HISTORIAL DE PITIDOS -->
+          <div class="scan-feed-card">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <strong style="font-size:14.5px;color:#fbcfe8;">📡 Últimas Lecturas</strong>
+                <span id="scanCounter" style="font-size:12px;background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:99px;">0 hoy</span>
+              </div>
+              <div id="scanFeedList">
+                <div class="feed-item">
+                  <strong>✓ Escáner Listo</strong>
+                  Haz clic en cualquier botón de la izquierda para escuchar el «bip» y ver cómo bajan los gramos.
+                </div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#d8b4fe;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15);">
+              💡 También acepta códigos de báscula (ej. <strong>2010350</strong> = 350 g de Salmón).
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         BLOQUE 2: MI NEVERA Y ALMACÉN (TARJETAS MUY FÁCILES DE LEER)
+         ========================================================= -->
+    <div class="view-block" id="block-stock">
+      <div class="white-card">
+        <div class="card-header">
+          <div>
+            <h2>📦 Stock Disponible en tu Nevera y Almacén</h2>
+            <p>Usa los botones rápidos (− / +) o escribe la cantidad directamente si haces recuento manual.</p>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="invSearch" placeholder="🔍 Buscar ingrediente (ej. salmón, atún, arroz, cajas)..." oninput="renderInventory()">
+          <select id="invCatFilter" onchange="renderInventory()">
+            <option value="todos">Todas las categorías</option>
+            <option value="Pescados y Mariscos">🐟 Pescados y Mariscos</option>
+            <option value="Base Sushi y Alga">🌾 Arroz, Nori y Base Sushi</option>
+            <option value="Vegetales y Salsas">🥑 Aguacate y Salsas</option>
+            <option value="Packaging">📦 Cajas y Envases</option>
+          </select>
+        </div>
+
+        <div class="inv-list" id="inventoryListContainer"></div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         BLOQUE 3: CALCULADORA DE GRAMAJE POR PEDIDO Y MERMA
+         ========================================================= -->
+    <div class="view-block" id="block-calc">
+      <div class="white-card">
+        <div class="card-header">
+          <div>
+            <h2>⚖️ Calculadora de Gramos Necesarios para un Pedido o Servicio</h2>
+            <p>Marca cuántas cajas o piezas vas a preparar a la izquierda y mira a la derecha los gramos exactos que necesitas.</p>
+          </div>
+          <button class="btn" onclick="clearOrderQuantities()">Limpiar a cero</button>
+        </div>
+
+        <div class="gram-calc-grid">
+          <div class="dish-picker-list" id="dishCounterGrid"></div>
+
+          <div class="needed-grams-box">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <strong style="font-size:16px;color:var(--purple-deep);">📋 Gramos que necesitas sacar:</strong>
+                <span id="totalWeightBadge" style="background:var(--pink-main);color:#fff;padding:5px 12px;border-radius:99px;font-size:12.5px;font-weight:800;">0 g</span>
+              </div>
+              <div id="gramBreakdownGrid"></div>
+            </div>
+
+            <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--pink-border);">
+              <div id="stockCheckMessage" style="font-size:13.5px;font-weight:800;margin-bottom:10px;color:var(--green-txt);"></div>
+              <button class="btn primary" style="width:100%;padding:14px;font-size:14.5px;" onclick="deductFromInventory()">
+                📉 Descontar todos estos Gramos de mi Inventario
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const DISH_RECIPES = [
+  { id: 'box16', name: 'Box Selección (16 pzs)', subtitle: '465 g totales', ingredients: { arroz_crudo: 124, salmon: 65, atun: 36, butterfish: 18, langostino: 28, aguacate: 35, nori: 1.5, caja_16: 1 } },
+  { id: 'box32', name: 'Box Luna Llena (32 pzs)', subtitle: '920 g totales', ingredients: { arroz_crudo: 245, salmon: 130, atun: 82, butterfish: 36, langostino: 55, aguacate: 75, nori: 3.5, caja_32: 1 } },
+  { id: 'nigiri_sake', name: 'Nigiri Salmón (2 pzs)', subtitle: '36g salmón + shari', ingredients: { arroz_crudo: 17, salmon: 36, salsas: 4 } },
+  { id: 'nigiri_maguro', name: 'Nigiri Atún Rojo (2 pzs)', subtitle: '36g atún + shari', ingredients: { arroz_crudo: 17, atun: 36, salsas: 2 } },
+  { id: 'uramaki_tsuki', name: 'Uramaki Salmón (8 pzs)', subtitle: '65g salmón + 45g aguac.', ingredients: { arroz_crudo: 62, salmon: 65, aguacate: 45, nori: 0.5, sesamo: 5 } },
+  { id: 'gunkan_tuna', name: 'Gunkan Tartar Atún (2 pzs)', subtitle: '44g atún + shari', ingredients: { arroz_crudo: 17, atun: 44, nori: 0.3, salsas: 8 } }
+];
+
+const INITIAL_INVENTORY = [
+  { id: 'salmon', name: '🐟 Salmón Noruego Limpio (Lomos Sake)', category: 'Pescados y Mariscos', storage: 'Cámara 1°C · Listo para cortar', stock: 2400, minStock: 800, maxRef: 3000, unit: 'g', costPerUnit: 0.0195 },
+  { id: 'atun', name: '🍣 Atún Rojo Maguro Limpio', category: 'Pescados y Mariscos', storage: 'Ultracongelado -60°C / Cámara 1°C', stock: 1250, minStock: 500, maxRef: 2000, unit: 'g', costPerUnit: 0.0320 },
+  { id: 'butterfish', name: '🐡 Pez Mantequilla Lomo Limpio', category: 'Pescados y Mariscos', storage: 'Cámara 1°C', stock: 750, minStock: 350, maxRef: 1200, unit: 'g', costPerUnit: 0.0220 },
+  { id: 'vieira', name: '🐚 Vieira Gallega Limpia (Hotate)', category: 'Pescados y Mariscos', storage: 'Cámara 1°C', stock: 420, minStock: 250, maxRef: 800, unit: 'g', costPerUnit: 0.0280 },
+  { id: 'langostino', name: '🦐 Langostino Ebi Limpio', category: 'Pescados y Mariscos', storage: 'Congelado -20°C', stock: 900, minStock: 350, maxRef: 1500, unit: 'g', costPerUnit: 0.0180 },
+  { id: 'arroz_crudo', name: '🌾 Arroz Japonés Koshihikari (Seco)', category: 'Base Sushi y Alga', storage: 'Almacén Seco', stock: 8500, minStock: 2500, maxRef: 10000, unit: 'g', costPerUnit: 0.0038 },
+  { id: 'nori', name: '🍙 Alga Nori Gold Tostada', category: 'Base Sushi y Alga', storage: 'Envase Hermético', stock: 85, minStock: 25, maxRef: 100, unit: 'hojas', costPerUnit: 0.22 },
+  { id: 'sesamo', name: '✨ Sésamo Tostado', category: 'Base Sushi y Alga', storage: 'Almacén Seco', stock: 450, minStock: 150, maxRef: 600, unit: 'g', costPerUnit: 0.009 },
+  { id: 'aguacate', name: '🥑 Aguacate Hass (Pulpa Limpia)', category: 'Vegetales y Salsas', storage: 'Cámara 6°C', stock: 1100, minStock: 400, maxRef: 1500, unit: 'g', costPerUnit: 0.0065 },
+  { id: 'salsas', name: '🍶 Salsas de Autor (Nikiri, Trufa, Miso)', category: 'Vegetales y Salsas', storage: 'Biberones Cámara 3°C', stock: 680, minStock: 200, maxRef: 1000, unit: 'g', costPerUnit: 0.014 },
+  { id: 'caja_16', name: '📦 Cajas Premium 16 piezas + Palillos', category: 'Packaging', storage: 'Almacén Envases', stock: 42, minStock: 15, maxRef: 60, unit: 'ud', costPerUnit: 1.25 },
+  { id: 'caja_32', name: '📦 Cajas Gran Formato 32 piezas + Palillos', category: 'Packaging', storage: 'Almacén Envases', stock: 24, minStock: 10, maxRef: 40, unit: 'ud', costPerUnit: 1.85 }
+];
+
+const BARCODE_CATALOG = [
+  { code: '841001', mode: 'raw', title: '🐟 Bloque Salmón Limpio', sub: 'Resta 250 g de Salmón', ingId: 'salmon', amount: 250, unit: 'g' },
+  { code: '841002', mode: 'raw', title: '🍣 Bloque Atún Rojo', sub: 'Resta 200 g de Atún', ingId: 'atun', amount: 200, unit: 'g' },
+  { code: '841003', mode: 'raw', title: '🐡 Lomo Pez Mantequilla', sub: 'Resta 150 g de Pez Mant.', ingId: 'butterfish', amount: 150, unit: 'g' },
+  { code: '841005', mode: 'raw', title: '🌾 Bolsa Arroz Japonés', sub: 'Resta 1.000 g de Arroz', ingId: 'arroz_crudo', amount: 1000, unit: 'g' },
+  { code: '990016', mode: 'dish', title: '🍱 Caja Selección (16 pzs)', sub: 'Resta pescado, arroz y 1 caja', dishId: 'box16' },
+  { code: '990032', mode: 'dish', title: '🌕 Caja Luna Llena (32 pzs)', sub: 'Resta toda la receta de 32 pzs', dishId: 'box32' },
+  { code: '990008', mode: 'dish', title: '🌀 Uramaki Salmón (8 pzs)', sub: 'Resta 65g salmón, aguac. y arroz', dishId: 'uramaki_tsuki' },
+  { code: '990002', mode: 'dish', title: '🔥 Nigiri Salmón (2 pzs)', sub: 'Resta 36g salmón y arroz', dishId: 'nigiri_sake' }
+];
+
+let inventory = [];
+let dishQuantities = { box16: 2, uramaki_tsuki: 1 };
+let scanDirection = -1;
+let scanCount = 0;
+let scanHistory = [];
+
+function loadInventory() {
+  try {
+    const saved = localStorage.getItem('tsukihana_inventory_v2');
+    if (saved) {
+      inventory = JSON.parse(saved);
+      return;
+    }
+  } catch (e) {}
+  inventory = JSON.parse(JSON.stringify(INITIAL_INVENTORY));
+}
+
+function saveInventory() {
+  localStorage.setItem('tsukihana_inventory_v2', JSON.stringify(inventory));
+  updateKPIs();
+}
+
+function playLaserBeep(ok = true) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(ok ? 2300 : 320, ctx.currentTime);
+    gain.gain.setValueAtTime(0.14, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.09);
+  } catch (e) {}
+}
+
+function updateKPIs() {
+  const fishIds = ['salmon', 'atun', 'butterfish', 'vieira', 'langostino'];
+  const totalFish = inventory.filter(i => fishIds.includes(i.id)).reduce((s, i) => s + (Number(i.stock) || 0), 0);
+  const riceItem = inventory.find(i => i.id === 'arroz_crudo');
+  const salmonItem = inventory.find(i => i.id === 'salmon');
+  const rice = riceItem ? Number(riceItem.stock) : 0;
+  const salmon = salmonItem ? Number(salmonItem.stock) : 0;
+
+  const maxBoxes = Math.max(0, Math.min(Math.floor(salmon / 65), Math.floor(rice / 124)));
+  const alerts = inventory.filter(i => (Number(i.stock) || 0) <= (Number(i.minStock) || 0)).length;
+  const totalVal = inventory.reduce((s, i) => s + ((Number(i.stock) || 0) * (Number(i.costPerUnit) || 0)), 0);
+
+  document.getElementById('kpiFishGrams').textContent = totalFish.toLocaleString('es-ES') + ' g';
+  document.getElementById('kpiRiceGrams').textContent = rice.toLocaleString('es-ES') + ' g';
+  document.getElementById('kpiShariEquiv').textContent = `Equivale a ~${Math.round(rice * 2.1).toLocaleString('es-ES')} g de Arroz Shari`;
+  document.getElementById('kpiMaxBoxes').textContent = maxBoxes + ' Cajas';
+  document.getElementById('kpiStockValue').textContent = totalVal.toFixed(2).replace('.', ',') + ' €';
+
+  const alertEl = document.getElementById('kpiAlerts');
+  if (alerts === 0) {
+    alertEl.style.color = '#047857';
+    alertEl.textContent = '🟢 Todo con stock suficiente';
+  } else {
+    alertEl.style.color = '#b91c1c';
+    alertEl.textContent = `⚠️ ${alerts} producto(s) con stock bajo`;
+  }
+}
+
+function renderBarcodeButtons() {
+  const rawEl = document.getElementById('rawBarcodeList');
+  const dishEl = document.getElementById('dishBarcodeList');
+
+  rawEl.innerHTML = BARCODE_CATALOG.filter(b => b.mode === 'raw').map(b => `
+    <button class="scan-item-btn" onclick="processBarcodeScan('${b.code}')">
+      <div>
+        <strong>${b.title}</strong>
+        <span>${b.sub}</span>
+      </div>
+      <span class="scan-code-tag">||| ${b.code}</span>
+    </button>
+  `).join('');
+
+  dishEl.innerHTML = BARCODE_CATALOG.filter(b => b.mode === 'dish').map(b => `
+    <button class="scan-item-btn" onclick="processBarcodeScan('${b.code}')">
+      <div>
+        <strong>${b.title}</strong>
+        <span>${b.sub}</span>
+      </div>
+      <span class="scan-code-tag">||| ${b.code}</span>
+    </button>
+  `).join('');
+}
+
+function toggleScanMode() {
+  scanDirection = scanDirection === -1 ? 1 : -1;
+  const btn = document.getElementById('scanModeBtn');
+  if (scanDirection === -1) {
+    btn.textContent = '📤 Modo: SALIDA (− Resta Stock)';
+    btn.style.background = '#fff';
+    btn.style.color = 'var(--purple-deep)';
+  } else {
+    btn.textContent = '📥 Modo: ENTRADA (+ Suma Stock)';
+    btn.style.background = '#ecfdf5';
+    btn.style.color = '#047857';
+  }
+}
+
+function processBarcodeScan(rawCode) {
+  const code = String(rawCode || '').trim();
+  if (!code) return;
+  document.getElementById('barcodeInput').value = '';
+
+  const entry = BARCODE_CATALOG.find(b => b.code === code);
+  const snapshot = [];
+
+  if (entry) {
+    if (entry.mode === 'raw') {
+      const item = inventory.find(i => i.id === entry.ingId);
+      if (item) {
+        snapshot.push({ id: item.id, prev: item.stock });
+        item.stock = Math.max(0, Number((item.stock + entry.amount * scanDirection).toFixed(1)));
+        playLaserBeep(true);
+        logScan(`🔊 ${entry.title}`, `${scanDirection === -1 ? 'Restados' : 'Sumados'} ${entry.amount} ${entry.unit} → Quedan ${item.stock} ${item.unit}.`, true);
+      }
+    } else {
+      const dish = DISH_RECIPES.find(d => d.id === entry.dishId);
+      if (dish) {
+        Object.entries(dish.ingredients).forEach(([ingId, req]) => {
+          const item = inventory.find(i => i.id === ingId);
+          if (item) {
+            snapshot.push({ id: item.id, prev: item.stock });
+            item.stock = Math.max(0, Number((item.stock + req * scanDirection).toFixed(1)));
+          }
+        });
+        playLaserBeep(true);
+        logScan(`🔊 ${entry.title}`, `Descontados todos los ingredientes de la receta automáticamente.`, true);
+      }
+    }
+    scanHistory.push(snapshot);
+    scanCount++;
+    document.getElementById('scanCounter').textContent = `${scanCount} hoy`;
+    saveInventory();
+    renderInventory();
+    calcOrderGramaje();
+    return;
+  }
+
+  // Soporte código de báscula 201XXXX
+  if (code.length === 7 && code.startsWith('20')) {
+    const grams = parseInt(code.slice(3), 10) || 0;
+    const item = inventory.find(i => i.id === 'salmon');
+    if (item && grams > 0) {
+      scanHistory.push([{ id: item.id, prev: item.stock }]);
+      item.stock = Math.max(0, item.stock + grams * scanDirection);
+      scanCount++;
+      document.getElementById('scanCounter').textContent = `${scanCount} hoy`;
+      playLaserBeep(true);
+      logScan(`🔊 Báscula Salmón (${grams} g)`, `Quedan ${item.stock} g en nevera.`, true);
+      saveInventory();
+      renderInventory();
+      calcOrderGramaje();
+      return;
+    }
+  }
+
+  playLaserBeep(false);
+  logScan(`⚠️ Código ${code} desconocido`, 'Haz clic en uno de los botones de la izquierda o usa 841001 / 990016.', false);
+}
+
+function logScan(title, text, ok) {
+  const box = document.getElementById('scanFeedList');
+  const div = document.createElement('div');
+  div.className = 'feed-item';
+  div.style.borderLeftColor = ok ? '#10b981' : '#ef4444';
+  div.innerHTML = `<strong style="color:${ok ? '#a7f3d0' : '#fca5a5'};">${title}</strong>${text}`;
+  box.prepend(div);
+  while (box.children.length > 4) box.removeChild(box.lastChild);
+}
+
+function undoLastScan() {
+  if (scanHistory.length === 0) {
+    alert('No hay lecturas recientes para deshacer.');
+    return;
+  }
+  const last = scanHistory.pop();
+  last.forEach(ch => {
+    const item = inventory.find(i => i.id === ch.id);
+    if (item) item.stock = ch.prev;
+  });
+  scanCount = Math.max(0, scanCount - 1);
+  document.getElementById('scanCounter').textContent = `${scanCount} hoy`;
+  playLaserBeep(true);
+  logScan('↩️ Lectura deshecha', 'Se han devuelto los gramos al inventario.', true);
+  saveInventory();
+  renderInventory();
+  calcOrderGramaje();
+}
+
+function renderInventory() {
+  const q = document.getElementById('invSearch').value.toLowerCase();
+  const cat = document.getElementById('invCatFilter').value;
+  const listEl = document.getElementById('inventoryListContainer');
+
+  listEl.innerHTML = inventory.map((item, idx) => {
+    if (cat !== 'todos' && item.category !== cat) return '';
+    if (q && !(`${item.name} ${item.storage}`.toLowerCase().includes(q))) return '';
+
+    const stock = Number(item.stock) || 0;
+    const min = Number(item.minStock) || 0;
+    const maxRef = Number(item.maxRef) || (min * 3);
+    const pct = Math.min(100, Math.round((stock / maxRef) * 100));
+
+    let badge = '<span class="status-badge status-ok">🟢 Bien de stock</span>';
+    let barColor = 'linear-gradient(90deg, #10b981, #059669)';
+    if (stock === 0) {
+      badge = '<span class="status-badge status-bad">🔴 Agotado</span>';
+      barColor = '#ef4444';
+    } else if (stock <= min) {
+      badge = '<span class="status-badge status-warn">🟠 Queda poco</span>';
+      barColor = '#f59e0b';
+    }
+
+    const step = item.unit === 'g' ? 100 : 5;
+
+    return `
+      <div class="inv-row-card">
+        <div class="inv-title">
+          <strong>${item.name}</strong>
+          <span>${item.category} · ${item.storage}</span>
+        </div>
+
+        <div class="inv-progress-wrap">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);">
+            <span>Mínimo: ${min} ${item.unit}</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="inv-progress-track">
+            <div class="inv-progress-fill" style="width:${pct}%;background:${barColor};"></div>
+          </div>
+        </div>
+
+        <div class="inv-controls">
+          <button class="step-btn" onclick="adjustStock(${idx}, -${step})">−${step}</button>
+          <input type="number" class="stock-num-input" value="${stock}" onchange="updateStockVal(${idx}, this.value)">
+          <span class="unit-lbl">${item.unit}</span>
+          <button class="step-btn" onclick="adjustStock(${idx}, ${step})">+${step}</button>
+        </div>
+
+        <div>${badge}</div>
+      </div>
+    `;
+  }).join('');
+
+  updateKPIs();
+}
+
+function adjustStock(idx, delta) {
+  inventory[idx].stock = Math.max(0, Number(((Number(inventory[idx].stock) || 0) + delta).toFixed(1)));
+  saveInventory();
+  renderInventory();
+  calcOrderGramaje();
+}
+
+function updateStockVal(idx, val) {
+  inventory[idx].stock = Math.max(0, parseFloat(val) || 0);
+  saveInventory();
+  renderInventory();
+  calcOrderGramaje();
+}
+
+function renderDishCounters() {
+  const grid = document.getElementById('dishCounterGrid');
+  grid.innerHTML = DISH_RECIPES.map(d => {
+    const q = dishQuantities[d.id] || 0;
+    return `
+      <div class="dish-pick-card">
+        <div>
+          <strong>${d.name}</strong>
+          <span>${d.subtitle}</span>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-round" onclick="changeDishQty('${d.id}', -1)">−</button>
+          <strong style="min-width:22px;text-align:center;font-size:15px;">${q}</strong>
+          <button class="qty-round plus" onclick="changeDishQty('${d.id}', 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function changeDishQty(id, delta) {
+  dishQuantities[id] = Math.max(0, (dishQuantities[id] || 0) + delta);
+  renderDishCounters();
+  calcOrderGramaje();
+}
+
+function clearOrderQuantities() {
+  dishQuantities = {};
+  renderDishCounters();
+  calcOrderGramaje();
+}
+
+function getRequiredTotals() {
+  const totals = {};
+  DISH_RECIPES.forEach(d => {
+    const q = dishQuantities[d.id] || 0;
+    if (q > 0) {
+      Object.entries(d.ingredients).forEach(([ingId, amt]) => {
+        totals[ingId] = (totals[ingId] || 0) + amt * q;
+      });
+    }
+  });
+  return totals;
+}
+
+function calcOrderGramaje() {
+  const totals = getRequiredTotals();
+  const entries = Object.entries(totals);
+  const grid = document.getElementById('gramBreakdownGrid');
+
+  if (entries.length === 0) {
+    grid.innerHTML = `<div style="color:var(--muted);font-size:14px;">Pulsa el botón + en cualquier plato de la izquierda para ver qué gramos necesitas sacar de la nevera.</div>`;
+    document.getElementById('totalWeightBadge').textContent = '0 g';
+    document.getElementById('stockCheckMessage').textContent = '';
+    return;
+  }
+
+  let shortages = 0;
+  let totalGrams = 0;
+
+  grid.innerHTML = entries.map(([ingId, req]) => {
+    const item = inventory.find(i => i.id === ingId);
+    const name = item ? item.name.split('(')[0] : ingId;
+    const unit = item ? item.unit : 'g';
+    const avail = item ? Number(item.stock) : 0;
+    const ok = avail >= req;
+    if (!ok) shortages++;
+    if (unit === 'g') totalGrams += (ingId === 'arroz_crudo' ? Math.round(req * 2.1) : req);
+
+    return `
+      <div class="needed-item" style="border-left:4px solid ${ok ? '#10b981' : '#ef4444'};">
+        <div>
+          <strong>${name}</strong>
+          <div style="font-size:12px;color:${ok ? '#047857' : '#b91c1c'};">
+            ${ok ? `✓ Tienes ${avail} ${unit} en stock` : `⚠️ Te faltan ${(req - avail).toFixed(1)} ${unit}`}
+          </div>
+        </div>
+        <strong style="font-size:16px;color:var(--purple-deep);">${Number.isInteger(req) ? req : req.toFixed(1)} ${unit}</strong>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('totalWeightBadge').textContent = `~${totalGrams} g comida total`;
+  const msg = document.getElementById('stockCheckMessage');
+  if (shortages === 0) {
+    msg.style.color = '#047857';
+    msg.textContent = '✅ Tienes stock suficiente de todo para preparar este pedido.';
+  } else {
+    msg.style.color = '#b91c1c';
+    msg.textContent = `⚠️ Atención: te falta stock en ${shortages} ingrediente(s).`;
+  }
+}
+
+function deductFromInventory() {
+  const totals = getRequiredTotals();
+  if (Object.keys(totals).length === 0) return;
+  Object.entries(totals).forEach(([ingId, req]) => {
+    const item = inventory.find(i => i.id === ingId);
+    if (item) item.stock = Math.max(0, Number((item.stock - req).toFixed(1)));
+  });
+  playLaserBeep(true);
+  saveInventory();
+  renderInventory();
+  calcOrderGramaje();
+  alert('✅ Gramos descontados de tu nevera y almacén.');
+}
+
+function setSectionView(sec, btn) {
+  document.querySelectorAll('.sec-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('block-scanner').classList.toggle('hidden', sec !== 'all' && sec !== 'scanner');
+  document.getElementById('block-stock').classList.toggle('hidden', sec !== 'all' && sec !== 'stock');
+  document.getElementById('block-calc').classList.toggle('hidden', sec !== 'all' && sec !== 'calc');
+}
+
+function addNewIngredient() {
+  const name = prompt('Nombre del nuevo producto (ej. 🐟 Hamachi Limpio):');
+  if (!name) return;
+  inventory.unshift({
+    id: 'ing_' + Date.now(),
+    name,
+    category: 'Pescados y Mariscos',
+    storage: 'Cámara 1°C',
+    stock: 500,
+    minStock: 200,
+    maxRef: 1000,
+    unit: 'g',
+    costPerUnit: 0.02
+  });
+  saveInventory();
+  renderInventory();
+}
+
+function resetInventory() {
+  if (confirm('¿Quieres restaurar las cantidades iniciales de la nevera?')) {
+    localStorage.removeItem('tsukihana_inventory_v2');
+    loadInventory();
+    renderInventory();
+    calcOrderGramaje();
+  }
+}
+
+function exportInventoryCSV() {
+  const rows = inventory.map(i => `${i.id};"${i.name}";"${i.category}";${i.stock};${i.unit}`);
+  const blob = new Blob(['\uFEFFID;Producto;Categoria;Stock;Unidad\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Inventario_Tsukihana.csv';
+  a.click();
+}
+
+// ESCUCHA AUTOMÁTICA DE PISTOLA LECTORA USB/BLUETOOTH
+let hidBuf = '';
+let hidTime = 0;
+window.addEventListener('keydown', e => {
+  const tag = document.activeElement ? document.activeElement.tagName : '';
+  if (tag === 'INPUT' || tag === 'SELECT') return;
+  const now = Date.now();
+  if (now - hidTime > 120) hidBuf = '';
+  hidTime = now;
+  if (e.key === 'Enter' && hidBuf.length >= 4) {
+    processBarcodeScan(hidBuf);
+    hidBuf = '';
+    e.preventDefault();
+  } else if (e.key.length === 1) {
+    hidBuf += e.key;
+  }
+});
+
+loadInventory();
+renderBarcodeButtons();
+renderDishCounters();
+calcOrderGramaje();
+renderInventory();
+</script>
+</body>
+</html>

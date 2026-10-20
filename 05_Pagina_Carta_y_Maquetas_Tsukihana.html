@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsukihana 月花 · 05 Página de Carta Completa y 3 Maquetas Visuales</title>
+<style>
+  :root {
+    --bg-main: #ffffff;
+    --bg-soft: #fff8fc;
+    --bg-lavender: #f7f2ff;
+    --purple-dark: #240a3d;
+    --purple-royal: #43126b;
+    --purple-mid: #6d28d9;
+    --purple-light: #f3e8ff;
+    --fuchsia-main: #db2777;
+    --fuchsia-bright: #ec4899;
+    --pink-blush: #fdf2f8;
+    --pink-border: rgba(219, 39, 119, 0.20);
+    --grad-brand: linear-gradient(135deg, #2d0d4e 0%, #6d28d9 48%, #db2777 100%);
+    --grad-cta: linear-gradient(135deg, #db2777 0%, #7e22ce 100%);
+    --grad-soft: linear-gradient(135deg, #ffffff 0%, #fdf2f8 50%, #f5f0ff 100%);
+    --ink: #1b0c29;
+    --muted: #645375;
+    --line: rgba(109, 40, 217, 0.13);
+    --shadow-soft: 0 14px 34px rgba(67, 18, 107, 0.07);
+    --shadow-pink: 0 10px 26px rgba(219, 39, 119, 0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    background: var(--bg-main);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .serif { font-family: "Georgia", "Times New Roman", serif; letter-spacing: -0.02em; }
+
+  /* BARRA DE NAVEGACIÓN DE HERRAMIENTAS */
+  .founder-bar {
+    position: sticky; top: 0; z-index: 1200;
+    background: #140624; color: #fff; padding: 10px 18px;
+    border-bottom: 1px solid rgba(236, 72, 153, 0.35);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    font-size: 12px;
+  }
+  .tool-nav { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tool-link {
+    color: #fbcfe8; text-decoration: none; padding: 5px 9px; border-radius: 7px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-weight: 600;
+  }
+  .tool-link.active, .tool-link:hover { background: #fff; color: #240a3d; }
+
+  .founder-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .toggle-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.09); padding: 5px 10px; border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.16); cursor: pointer;
+  }
+  .toggle-pill input { accent-color: #ec4899; }
+  .btn-bar {
+    background: var(--grad-cta); color: #fff; border: none; padding: 6px 12px;
+    border-radius: 8px; font-weight: 800; font-size: 11.5px; cursor: pointer;
+  }
+
+  /* CABECERA WEB DE LA PÁGINA CARTA */
+  .site-header {
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line); padding: 16px 32px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+  }
+  .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .monogram {
+    width: 44px; height: 44px; border-radius: 13px; background: var(--grad-brand);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; box-shadow: var(--shadow-pink);
+  }
+  .brand-text strong {
+    display: block; font-size: 22px; letter-spacing: 0.08em; font-family: "Georgia", serif;
+    background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .brand-text span {
+    display: block; font-size: 10.5px; color: var(--fuchsia-main); font-weight: 800;
+    letter-spacing: 0.15em; text-transform: uppercase;
+  }
+
+  /* SELECTOR DE LAS 3 MAQUETAS DE CARTA */
+  .mockup-switcher-hero {
+    background: var(--grad-soft);
+    border-bottom: 1px solid var(--line);
+    padding: 42px 24px 34px;
+    text-align: center;
+  }
+  .kicker-pill {
+    display: inline-block; background: var(--pink-blush); color: var(--fuchsia-main);
+    border: 1px solid var(--pink-border); padding: 5px 14px; border-radius: 99px;
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;
+  }
+  .mockup-switcher-hero h1 {
+    font-size: clamp(30px, 4vw, 44px); color: var(--purple-dark); font-weight: 400; margin-bottom: 10px;
+  }
+  .mockup-switcher-hero h1 span {
+    background: var(--grad-cta); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-style: italic; font-weight: 700;
+  }
+  .mockup-switcher-hero p {
+    color: var(--muted); max-width: 680px; margin: 0 auto 24px; font-size: 15.5px;
+  }
+  .layout-buttons {
+    display: inline-flex; background: #fff; padding: 6px; border-radius: 16px;
+    border: 1.5px solid var(--pink-border); box-shadow: var(--shadow-soft); gap: 6px; flex-wrap: wrap; justify-content: center;
+  }
+  .layout-btn {
+    padding: 10px 18px; border-radius: 12px; border: none; background: transparent;
+    color: var(--purple-dark); font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.15s;
+  }
+  .layout-btn.active {
+    background: var(--grad-cta); color: #fff; box-shadow: var(--shadow-pink);
+  }
+
+  /* BARRA DE FILTROS COMÚN (CATEGORÍAS, BUSCADOR Y ALÉRGENOS) */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+  .filter-panel {
+    background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px;
+    margin-bottom: 28px; box-shadow: var(--shadow-soft);
+  }
+  .cat-pills {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px;
+  }
+  .cat-pill {
+    padding: 9px 18px; border-radius: 99px; border: 1px solid var(--line);
+    background: var(--bg-soft); color: var(--purple-dark); font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .cat-pill.active, .cat-pill:hover {
+    background: var(--grad-cta); color: #fff; border-color: transparent;
+  }
+  .allergen-strip {
+    border-top: 1px solid var(--line); padding-top: 14px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .al-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .al-chip {
+    font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 99px;
+    background: #fff; border: 1px solid var(--pink-border); cursor: pointer; user-select: none;
+  }
+  .al-chip.excluded {
+    background: #fee2e2; border-color: #f87171; color: #991b1b; text-decoration: line-through;
+  }
+
+  /* =========================================================
+     MAQUETA 1: VISUAL CARDS CON FOTO, GRAMAJE Y CARRITO
+     ========================================================= */
+  .visual-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px;
+  }
+  .v-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 22px; overflow: hidden;
+    box-shadow: var(--shadow-soft); display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .v-card:hover { transform: translateY(-4px); border-color: var(--fuchsia-bright); }
+  .v-img {
+    height: 195px; position: relative; overflow: hidden; background: var(--grad-brand);
+  }
+  .v-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s; }
+  .v-card:hover .v-img img { transform: scale(1.05); }
+  .v-badges-top {
+    position: absolute; top: 12px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  .badge-cat {
+    background: rgba(255,255,255,0.95); color: var(--purple-dark); font-size: 10.5px;
+    font-weight: 800; padding: 4px 10px; border-radius: 99px; text-transform: uppercase;
+  }
+  .badge-sig {
+    background: var(--grad-cta); color: #fff; font-size: 10.5px; font-weight: 800;
+    padding: 4px 10px; border-radius: 99px;
+  }
+  .badge-grams {
+    position: absolute; bottom: 10px; right: 12px;
+    background: rgba(36, 10, 61, 0.85); color: #fbcfe8; font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 8px; backdrop-filter: blur(4px);
+  }
+  .v-body { padding: 20px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+  .v-body h3 { font-size: 18.5px; color: var(--purple-dark); margin-bottom: 6px; }
+  .v-desc { font-size: 13.3px; color: var(--muted); margin-bottom: 12px; }
+  .v-tech-meta {
+    background: var(--bg-soft); border: 1px solid var(--pink-border); border-radius: 10px;
+    padding: 8px 10px; font-size: 11.5px; color: var(--purple-royal); margin-bottom: 12px;
+  }
+  .v-allergens { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+  .a-mini {
+    font-size: 11px; background: var(--bg-lavender); padding: 3px 8px; border-radius: 6px; color: var(--purple-dark); font-weight: 600;
+  }
+  .v-footer {
+    display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--line);
+  }
+  .price-val { font-size: 19px; font-weight: 800; color: var(--purple-dark); }
+  .price-consult {
+    font-size: 12px; font-weight: 700; color: var(--fuchsia-main); background: var(--pink-blush);
+    padding: 5px 10px; border-radius: 8px;
+  }
+  .btn-order {
+    background: var(--grad-cta); color: #fff; border: none; padding: 8px 15px;
+    border-radius: 99px; font-weight: 700; font-size: 12.5px; cursor: pointer;
+  }
+
+  /* =========================================================
+     MAQUETA 2: CARTA EDITORIAL / MÓVIL QR (LISTA GOURMET)
+     ========================================================= */
+  .editorial-wrap {
+    max-width: 880px; margin: 0 auto; display: grid; gap: 28px;
+  }
+  .ed-section {
+    background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 28px;
+    box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
+  }
+  .ed-section::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--grad-brand);
+  }
+  .ed-cat-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 2px solid var(--pink-blush); padding-bottom: 10px; margin-bottom: 18px;
+  }
+  .ed-cat-header h2 { font-size: 26px; color: var(--purple-dark); font-weight: 400; }
+  .ed-cat-header span { font-size: 12px; color: var(--fuchsia-main); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ed-item {
+    display: grid; grid-template-columns: 74px 1fr auto; gap: 16px; align-items: center;
+    padding: 14px 0; border-bottom: 1px dashed var(--line);
+  }
+  .ed-item:last-child { border-bottom: none; }
+  .ed-thumb {
+    width: 74px; height: 74px; border-radius: 14px; object-fit: cover; border: 1.5px solid var(--pink-border);
+  }
+  .ed-info h4 { font-size: 16.5px; color: var(--purple-dark); margin-bottom: 3px; font-family: "Georgia", serif; }
+  .ed-info p { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .ed-meta-row { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11px; color: var(--fuchsia-main); font-weight: 700; }
+  .ed-price-col { text-align: right; white-space: nowrap; }
+
+  /* =========================================================
+     MAQUETA 3: CARTA IMPRIMIBLE A4 DE MESA Y EVENTOS
+     ========================================================= */
+  .print-a4-sheet {
+    max-width: 210mm; margin: 0 auto; background: #fff; border: 2px solid var(--pink-border);
+    border-radius: 16px; padding: 14mm 15mm; box-shadow: 0 20px 50px rgba(36, 10, 61, 0.14);
+  }
+  .a4-header {
+    text-align: center; border-bottom: 2px solid var(--purple-dark); padding-bottom: 14px; margin-bottom: 18px;
+  }
+  .a4-header h2 {
+    font-size: 30px; letter-spacing: 0.12em; color: var(--purple-dark); text-transform: uppercase;
+  }
+  .a4-header p { font-size: 12px; color: var(--fuchsia-main); font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 4px; }
+  .a4-columns {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+  }
+  .a4-cat-block { margin-bottom: 16px; break-inside: avoid; }
+  .a4-cat-title {
+    background: var(--grad-brand); color: #fff; padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .a4-row { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dotted rgba(109, 40, 217, 0.2); }
+  .a4-row-top { display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; color: var(--purple-dark); }
+  .a4-row-desc { font-size: 11.2px; color: var(--muted); margin: 2px 0 4px; }
+  .a4-row-meta { font-size: 10px; color: var(--fuchsia-main); font-weight: 700; }
+
+  @media (max-width: 760px) {
+    .a4-columns { grid-template-columns: 1fr; }
+    .ed-item { grid-template-columns: 1fr; }
+  }
+  @media print {
+    .founder-bar, .site-header, .mockup-switcher-hero, .filter-panel { display: none !important; }
+    .container { padding: 0; max-width: 100%; }
+    .print-a4-sheet { box-shadow: none; border: none; padding: 8mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="founder-bar">
+  <div class="tool-nav">
+    <a class="tool-link" href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a class="tool-link" href="index.html">🌸 Web Clientes</a>
+    <a class="tool-link" href="01_Vista_Previa_Interactiva_Tsukihana.html">🌸 01 Home Page</a>
+    <a class="tool-link active" href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">📖 05 Página Carta (3 Maquetas)</a>
+    <a class="tool-link" href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">⚖️ 06 Inventario y Gramaje</a>
+    <a class="tool-link" href="07_Integracion_Reservalo_x_Tsukihana_Maqueta.html">🔗 07 Resérvalo × Tsukihana</a>
+    <a class="tool-link" href="08_App_Movil_Tsukihana_Maqueta.html">📱 08 App Móvil</a>
+    <a class="tool-link" href="09_App_Escaneado_Inventario_x_Tsukihana.html">🔫 09 App ScanStock × Tsukihana</a>
+    <a class="tool-link" href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html">🧮 02 Escandallos</a>
+    <a class="tool-link" href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">📄 03 Dossier A4</a>
+    <a class="tool-link" href="04_Cabina_Operativa_Pedidos_y_Lanzamiento_Tsukihana.html">🍱 04 Cabina Pedidos</a>
+  </div>
+  <div class="founder-controls">
+    <label class="toggle-pill">
+      <input type="checkbox" id="showPricesToggle" checked onchange="renderAllViews()">
+      <span>Mostrar Precios €</span>
+    </label>
+    <label class="toggle-pill">
+      <input type="checkbox" id="showGramsToggle" checked onchange="renderAllViews()">
+      <span>Mostrar Gramaje (g)</span>
+    </label>
+    <button class="btn-bar" onclick="window.print()">🖨️ Exportar Carta a PDF</button>
+  </div>
+</div>
+
+<header class="site-header">
+  <a href="01_Vista_Previa_Interactiva_Tsukihana.html" class="brand-logo">
+    <div class="monogram">月</div>
+    <div class="brand-text">
+      <strong>TSUKIHANA</strong>
+      <span>Carta Gastronómica · Sincronizada con ScanStock (09)</span>
+    </div>
+  </a>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <a href="09_App_Escaneado_Inventario_x_Tsukihana.html" style="text-decoration:none;background:var(--pink-blush);color:var(--fuchsia-main);border:1px solid var(--pink-border);padding:8px 14px;border-radius:99px;font-size:12.5px;font-weight:800;">
+      🔫 Abrir App Escáner Stock (09) →
+    </a>
+    <a href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html" style="text-decoration:none;background:var(--grad-cta);color:#fff;padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:800;">
+      🧮 Editar Precios y Escandallos
+    </a>
+  </div>
+</header>
+
+<section class="mockup-switcher-hero">
+  <span class="kicker-pill">月花 · Propuesta Gastronómica Completa en Blanco, Rosa/Fucsia y Morado</span>
+  <h1>Nuestra Carta Artesanal <span>& Maquetas de Presentación</span></h1>
+  <p>Explora las 16 creaciones de Tsukihana con su desglose de piezas, gramaje neto, ingredientes y los 10 alérgenos oficiales. Cambia entre las 3 maquetas para ver cómo luce en Web, en Móvil/QR o en Carta Impresa A4.</p>
+
+  <div class="layout-buttons">
+    <button class="layout-btn active" onclick="switchMockup('visual', this)">🖼️ Maqueta 1: Carta Web Fotográfica (Tarjetas)</button>
+    <button class="layout-btn" onclick="switchMockup('editorial', this)">📱 Maqueta 2: Menú Degustación Editorial / QR</button>
+    <button class="layout-btn" onclick="switchMockup('print', this)">📄 Maqueta 3: Carta Imprimible A4 (Mesa y Eventos)</button>
+  </div>
+</section>
+
+<div class="container">
+  <!-- PANEL DE FILTROS -->
+  <div class="filter-panel">
+    <div class="cat-pills">
+      <button class="cat-pill active" onclick="setCategory('todos', this)">Toda la Carta (16)</button>
+      <button class="cat-pill" onclick="setCategory('packs', this)">🍱 Packs Degustación</button>
+      <button class="cat-pill" onclick="setCategory('nigiris', this)">🍣 Nigiris Clásicos y Aburi</button>
+      <button class="cat-pill" onclick="setCategory('uramakis', this)">🌀 Uramakis Equilibrados</button>
+      <button class="cat-pill" onclick="setCategory('makis', this)">🎋 Hosomakis Puros</button>
+      <button class="cat-pill" onclick="setCategory('gunkans', this)">👑 Gunkans Creativos</button>
+      <button class="cat-pill" onclick="setCategory('extras', this)">🥢 Entrantes y Extras</button>
+    </div>
+    <div class="allergen-strip">
+      <span style="font-size:12px;font-weight:800;color:var(--purple-royal);">🔍 Filtrar por Alérgenos (clic para excluir platos que lo contengan):</span>
+      <div class="al-chips" id="allergenFilterBar"></div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR MAQUETA 1: VISUAL CARDS -->
+  <div id="view-visual" class="visual-grid"></div>
+
+  <!-- CONTENEDOR MAQUETA 2: EDITORIAL QR -->
+  <div id="view-editorial" class="editorial-wrap" style="display:none;"></div>
+
+  <!-- CONTENEDOR MAQUETA 3: IMPRIMIBLE A4 -->
+  <div id="view-print" style="display:none;">
+    <div class="print-a4-sheet">
+      <div class="a4-header">
+        <h2>TSUKIHANA · 月花</h2>
+        <p>Sushi Artesanal con Técnica, Respeto por el Producto y Creatividad · Vigo</p>
+      </div>
+      <div class="a4-columns" id="a4ColumnsContainer"></div>
+      <div style="margin-top:16px;padding-top:10px;border-top:1.5px solid var(--purple-dark);display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);">
+        <span>🛡️ Todos nuestros productos cuentan con verificación de alérgenos y protocolo sanitario de prevención de anisakis.</span>
+        <strong style="color:var(--fuchsia-main);">Pedidos y Eventos en Vigo · @tsukihana.vigo</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const OFFICIAL_ALLERGENS = {
+  pescado: { id: 'pescado', name: 'Pescado', icon: '🐟' },
+  soja: { id: 'soja', name: 'Soja', icon: '🫘' },
+  sesamo: { id: 'sesamo', name: 'Sésamo', icon: '🌾' },
+  gluten: { id: 'gluten', name: 'Gluten', icon: '🍞' },
+  crustaceos: { id: 'crustaceos', name: 'Crustáceos', icon: '🦐' },
+  moluscos: { id: 'moluscos', name: 'Moluscos', icon: '🦪' },
+  huevo: { id: 'huevo', name: 'Huevo', icon: '🥚' },
+  lacteos: { id: 'lacteos', name: 'Lácteos', icon: '🥛' },
+  mostaza: { id: 'mostaza', name: 'Mostaza', icon: '🌭' },
+  frutos_secos: { id: 'frutos_secos', name: 'Frutos de cáscara', icon: '🌰' }
+};
+
+const CATEGORY_LABELS = {
+  packs: '🍱 Packs y Cajas de Autor',
+  nigiris: '🍣 Nigiris Clásicos y Flambeados (Aburi)',
+  uramakis: '🌀 Uramakis de Combinación Equilibrada',
+  makis: '🎋 Hosomakis Clásicos de Precisión',
+  gunkans: '👑 Gunkans Creativos a Cuchillo',
+  extras: '🥢 Entrantes y Extras Japoneses'
+};
+
+const FULL_CATALOG = [
+  // PACKS
+  {
+    id: 'pack-tsukihana-16',
+    name: 'Box Tsukihana Selección (16 pzs)',
+    category: 'packs',
+    pieces: 16,
+    gramsNet: 465,
+    gramBreakdown: '260g arroz shari + 145g pescado noble + 60g vegetales/salsas',
+    description: 'Recorrido equilibrado del sushiman: 4 nigiris de autor (salmón aburi, atún nikiri, pez mantequilla trufado, langostino), 8 uramakis de la casa y 4 hosomakis puros.',
+    priceEur: 26.50,
+    allergens: ['pescado', 'soja', 'sesamo', 'gluten', 'crustaceos'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'pack-luna-llena-32',
+    name: 'Box Luna Llena Compartir (32 pzs)',
+    category: 'packs',
+    pieces: 32,
+    gramsNet: 920,
+    gramBreakdown: '510g arroz shari + 295g selección pescado + 115g rellenos/acabados',
+    description: 'Pensado para 2-3 comensales: 8 nigiris clásicos y flambeados, 16 uramakis (Tsukihana + Ebi Tempura), 4 hosomakis de atún y 4 gunkans de tartar.',
+    priceEur: 49.00,
+    allergens: ['pescado', 'soja', 'sesamo', 'gluten', 'crustaceos', 'huevo'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'pack-omakase-nigiri-10',
+    name: 'Box Puro Nigiri & Aburi (10 pzs)',
+    category: 'packs',
+    pieces: 10,
+    gramsNet: 370,
+    gramBreakdown: '180g arroz shari templado + 180g lomos limpios + 10g glaseados',
+    description: 'Para amantes del corte puro sobre arroz: 2 Sake Aburi lima, 2 Maguro nikiri, 2 Pez Mantequilla trufa, 2 Vieira gallega aburi y 2 Ebi.',
+    priceEur: 24.90,
+    allergens: ['pescado', 'soja', 'sesamo', 'gluten', 'crustaceos', 'moluscos'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80'
+  },
+
+  // NIGIRIS
+  {
+    id: 'nigiri-salmon-aburi',
+    name: 'Nigiri Sake Aburi con Lima y Miso Dulce (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    gramsNet: 76,
+    gramBreakdown: '36g shari + 36g lomo salmón + 4g miso/lima',
+    description: 'Lomo de salmón noruego ligeramente flambeado a soplete para fundir su infiltración, glaseado sutil de miso blanco y ralladura de lima fresca.',
+    priceEur: 5.20,
+    allergens: ['pescado', 'soja', 'sesamo'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'nigiri-maguro-nikiri',
+    name: 'Nigiri Maguro con Soja Nikiri Envejecida (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    gramsNet: 74,
+    gramBreakdown: '36g shari + 36g atún rojo + 2g nikiri/wasabi',
+    description: 'Corte limpio de atún sobre shari templado, pincelado con reducción casera nikiri (soja, mirin y dashi) y un punto de wasabi.',
+    priceEur: 6.40,
+    allergens: ['pescado', 'soja', 'gluten'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'nigiri-butterfish-trufa',
+    name: 'Nigiri Pez Mantequilla Aburi & Trufa Negra (2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    gramsNet: 76,
+    gramBreakdown: '36g shari + 36g pez mantequilla + 4g trufa/cebollino',
+    description: 'Textura sedosa flambeada al instante con tapenade de trufa negra, cebollino fino y escama de sal marina.',
+    priceEur: 5.80,
+    allergens: ['pescado', 'soja'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'nigiri-vieira-rias',
+    name: 'Nigiri Hotate (Vieira Flambeada & Mantequilla Cítrica · 2 pzs)',
+    category: 'nigiris',
+    pieces: 2,
+    gramsNet: 78,
+    gramBreakdown: '36g shari + 38g vieira limpia + 4g emulsión yuzu',
+    description: 'Guiño atlántico desde Vigo: vieira marcada al soplete con toque de mantequilla tostada, yuzu y sal negra.',
+    priceEur: 6.90,
+    allergens: ['moluscos', 'soja', 'lacteos'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=800&q=80'
+  },
+
+  // URAMAKIS
+  {
+    id: 'uramaki-tsukihana',
+    name: 'Uramaki Tsukihana (Salmón, Aguacate y Tartar Suave · 8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    gramsNet: 245,
+    gramBreakdown: '130g shari + 65g salmón + 45g aguacate/pepino + 5g sésamo',
+    description: 'Interior de aguacate cremoso y pepino crujiente, cubierto de láminas de salmón y coronado con tartar especiado japonés y sésamo tostado.',
+    priceEur: 13.80,
+    allergens: ['pescado', 'soja', 'sesamo', 'huevo'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'uramaki-ebi-crunch',
+    name: 'Uramaki Ebi Tempura & Mango Equilibrado (8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    gramsNet: 235,
+    gramBreakdown: '130g shari + 55g langostino tempura + 45g aguacate/mango + 5g tare',
+    description: 'Langostino crujiente, aguacate y contrapunto fresco de mango, terminado con emulsión suave de kimchi y salsa tare artesanal.',
+    priceEur: 13.50,
+    allergens: ['crustaceos', 'gluten', 'soja', 'sesamo', 'huevo'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1615361200141-f45040f367be?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'uramaki-maguro-tataki',
+    name: 'Uramaki Maguro Tataki & Espárrago Crujiente (8 pzs)',
+    category: 'uramakis',
+    pieces: 8,
+    gramsNet: 240,
+    gramBreakdown: '130g shari + 60g atún sellado + 45g aguacate/espárrago + 5g ponzu',
+    description: 'Relleno cremoso de aguacate y verdura en tempura ligera, envuelto en atún rojo sellado con reducción cítrica ponzu.',
+    priceEur: 14.50,
+    allergens: ['pescado', 'soja', 'gluten', 'sesamo'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?auto=format&fit=crop&w=800&q=80'
+  },
+
+  // MAKIS
+  {
+    id: 'maki-sake-hoso',
+    name: 'Hosomaki Puro de Salmón Noruego (6 pzs)',
+    category: 'makis',
+    pieces: 6,
+    gramsNet: 115,
+    gramBreakdown: '80g shari + 35g corte central salmón + 1/2 hoja nori',
+    description: 'La prueba de precisión del sushi clásico: alga nori crujiente, shari aireado y corte central de salmón fresco.',
+    priceEur: 6.20,
+    allergens: ['pescado'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'maki-tekka-atun',
+    name: 'Tekkamaki Tradicional de Atún Rojo (6 pzs)',
+    category: 'makis',
+    pieces: 6,
+    gramsNet: 115,
+    gramBreakdown: '80g shari + 35g atún limpio + 1/2 hoja nori',
+    description: 'Bocado limpio y directo de atún rojo con un sutil toque de wasabi entre el arroz y el pescado.',
+    priceEur: 6.90,
+    allergens: ['pescado', 'soja'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'maki-aguacate-sesamo',
+    name: 'Hosomaki Vegano de Aguacate Cremoso y Sésamo (6 pzs)',
+    category: 'makis',
+    pieces: 6,
+    gramsNet: 112,
+    gramBreakdown: '80g shari + 30g aguacate + 2g sésamo tostado',
+    description: 'Suave, vegetal y equilibrado, con aguacate en su punto óptimo de maduración y semillas de sésamo recién tostadas.',
+    priceEur: 5.40,
+    allergens: ['sesamo'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?auto=format&fit=crop&w=800&q=80'
+  },
+
+  // GUNKANS
+  {
+    id: 'gunkan-spicy-tuna',
+    name: 'Gunkan de Tartar de Atún, Yema Curada y Cebollino (2 pzs)',
+    category: 'gunkans',
+    pieces: 2,
+    gramsNet: 88,
+    gramBreakdown: '36g shari + 44g tartar atún + 8g emulsión yema/nori',
+    description: 'Bocado intenso de atún picado a cuchillo con aceite de sésamo tostado y emulsión sedosa de yema.',
+    priceEur: 6.80,
+    allergens: ['pescado', 'soja', 'sesamo', 'huevo'],
+    isSignature: true,
+    img: 'https://images.unsplash.com/photo-1562802378-063ec186a863?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'gunkan-sake-tobiko',
+    name: 'Gunkan Tartar de Salmón, Aguacate y Tobiko Crujiente (2 pzs)',
+    category: 'gunkans',
+    pieces: 2,
+    gramsNet: 86,
+    gramBreakdown: '36g shari + 40g salmón/aguacate + 10g huevas tobiko',
+    description: 'Contraste de untuosidad y estallido marino con huevas de pez volador y cebollino japonés.',
+    priceEur: 6.40,
+    allergens: ['pescado', 'soja', 'sesamo'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=800&q=80'
+  },
+
+  // EXTRAS
+  {
+    id: 'extra-gyozas-edamame',
+    name: 'Edamame al Vapor con Sal en Escamas o Kimchi Suave',
+    category: 'extras',
+    pieces: 1,
+    gramsNet: 160,
+    gramBreakdown: '150g vainas edamame + 10g aderezo kimchi/sésamo',
+    description: 'Vainas de soja tiernas salteadas al wok o al vapor para abrir el apetito antes del sushi.',
+    priceEur: 4.50,
+    allergens: ['soja', 'sesamo'],
+    isSignature: false,
+    img: 'https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=800&q=80'
+  }
+];
+
+let activeCategory = 'todos';
+let activeMockup = 'visual';
+let excludedAllergens = new Set();
+
+function renderAllergenBar() {
+  const bar = document.getElementById('allergenFilterBar');
+  bar.innerHTML = Object.values(OFFICIAL_ALLERGENS).map(a => {
+    const ex = excludedAllergens.has(a.id);
+    return `<span class="al-chip ${ex ? 'excluded' : ''}" onclick="toggleExclude('${a.id}')">${a.icon} ${a.name}</span>`;
+  }).join('');
+}
+
+function toggleExclude(id) {
+  if (excludedAllergens.has(id)) excludedAllergens.delete(id);
+  else excludedAllergens.add(id);
+  renderAllergenBar();
+  renderAllViews();
+}
+
+function setCategory(cat, btn) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAllViews();
+}
+
+function switchMockup(mode, btn) {
+  activeMockup = mode;
+  document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('view-visual').style.display = mode === 'visual' ? 'grid' : 'none';
+  document.getElementById('view-editorial').style.display = mode === 'editorial' ? 'grid' : 'none';
+  document.getElementById('view-print').style.display = mode === 'print' ? 'block' : 'none';
+}
+
+function getFilteredCatalog() {
+  return FULL_CATALOG.filter(item => {
+    if (activeCategory !== 'todos' && item.category !== activeCategory) return false;
+    for (const ex of excludedAllergens) {
+      if ((item.allergens || []).includes(ex)) return false;
+    }
+    return true;
+  });
+}
+
+function getLiveDishStockStatus(item) {
+  try {
+    const raw = localStorage.getItem('tsukihana_inventory_v1');
+    if (!raw) return { ok: true, label: '🟢 En Stock' };
+    const inv = JSON.parse(raw);
+    const getSt = (id) => {
+      const f = inv.find(x => x.id === id);
+      return f ? (Number(f.stock) || 0) : 999;
+    };
+    const txt = (item.name + ' ' + item.description).toLowerCase();
+    if ((txt.includes('salmón') || txt.includes('sake') || item.id.includes('pack-')) && getSt('salmon') < 40) {
+      return { ok: false, label: '🔴 Agotado Hoy (Sin Salmón)' };
+    }
+    if ((txt.includes('atún') || txt.includes('maguro') || txt.includes('tekka') || item.id.includes('pack-')) && getSt('atun') < 40) {
+      return { ok: false, label: '🔴 Agotado Hoy (Sin Atún)' };
+    }
+    if (txt.includes('vieira') && getSt('vieira') < 38) {
+      return { ok: false, label: '🔴 Agotado Hoy (Sin Vieira)' };
+    }
+    if (txt.includes('mantequilla') && !txt.includes('vieira') && getSt('butterfish') < 36) {
+      return { ok: false, label: '🔴 Agotado Hoy (Sin Pez Mant.)' };
+    }
+    if ((txt.includes('ebi') || txt.includes('langostino')) && getSt('langostino') < 45) {
+      return { ok: false, label: '🔴 Agotado Hoy (Sin Ebi)' };
+    }
+  } catch (e) {}
+  return { ok: true, label: '🟢 Disponible' };
+}
+
+function renderAllViews() {
+  const showPrices = document.getElementById('showPricesToggle').checked;
+  const showGrams = document.getElementById('showGramsToggle').checked;
+  const items = getFilteredCatalog();
+
+  // 1. Render Maqueta Visual
+  const vGrid = document.getElementById('view-visual');
+  vGrid.innerHTML = items.map(item => {
+    const st = getLiveDishStockStatus(item);
+    const priceHtml = showPrices
+      ? `<span class="price-val">${item.priceEur.toFixed(2).replace('.', ',')} €</span>`
+      : `<span class="price-consult">Consultar disponibilidad</span>`;
+    const alHtml = item.allergens.map(id => {
+      const a = OFFICIAL_ALLERGENS[id];
+      return a ? `<span class="a-mini">${a.icon} ${a.name}</span>` : '';
+    }).join('');
+    return `
+      <article class="v-card" style="${!st.ok ? 'opacity:0.68;border-color:#fca5a5;' : ''}">
+        <div>
+          <div class="v-img">
+            <img src="${item.img}" alt="${item.name}">
+            <div class="v-badges-top">
+              <span class="badge-cat">${item.category} · ${item.pieces} pzs</span>
+              <span class="badge-sig" style="background:${st.ok ? 'rgba(16,185,129,0.92)' : '#dc2626'};">${st.label}</span>
+            </div>
+            ${showGrams ? `<span class="badge-grams">⚖️ ${item.gramsNet} g netos</span>` : ''}
+          </div>
+          <div class="v-body">
+            <div>
+              <h3>${item.name}</h3>
+              <p class="v-desc">${item.description}</p>
+              ${showGrams ? `<div class="v-tech-meta"><strong>Ficha de Gramaje:</strong> ${item.gramBreakdown}</div>` : ''}
+              <div class="v-allergens">${alHtml}</div>
+            </div>
+            <div class="v-footer">
+              ${priceHtml}
+              <button class="btn-order" style="${!st.ok ? 'background:#9ca3af;cursor:not-allowed;' : ''}"
+                      onclick="${st.ok ? `alert('Añadido a tu selección: ${item.name}')` : `alert('Este plato está bloqueado automáticamente por ScanStock OS al haberse agotado su ingrediente principal en cámara.')`}">
+                ${st.ok ? '+ Seleccionar' : 'Agotado en Cámara'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  // 2. Render Maqueta Editorial / QR
+  const edWrap = document.getElementById('view-editorial');
+  const cats = ['packs', 'nigiris', 'uramakis', 'makis', 'gunkans', 'extras'];
+  edWrap.innerHTML = cats.map(c => {
+    const catItems = items.filter(i => i.category === c);
+    if (!catItems.length) return '';
+    return `
+      <div class="ed-section">
+        <div class="ed-cat-header">
+          <h2>${CATEGORY_LABELS[c]}</h2>
+          <span>${catItems.length} propuestas</span>
+        </div>
+        ${catItems.map(item => {
+          const st = getLiveDishStockStatus(item);
+          return `
+          <div class="ed-item" style="${!st.ok ? 'opacity:0.6;' : ''}">
+            <img class="ed-thumb" src="${item.img}" alt="${item.name}">
+            <div class="ed-info">
+              <h4>${item.name} ${item.isSignature ? '🌸' : ''} <span style="font-size:11px;font-family:sans-serif;color:${st.ok ? '#15803d' : '#b91c1c'};">(${st.label})</span></h4>
+              <p>${item.description}</p>
+              <div class="ed-meta-row">
+                ${showGrams ? `<span>⚖️ ${item.gramsNet}g (${item.gramBreakdown})</span>` : ''}
+                <span>· Alérgenos: ${item.allergens.map(id => OFFICIAL_ALLERGENS[id]?.icon || '').join(' ')}</span>
+              </div>
+            </div>
+            <div class="ed-price-col">
+              ${showPrices ? `<div class="price-val">${item.priceEur.toFixed(2).replace('.', ',')} €</div>` : `<span class="price-consult">Consultar</span>`}
+            </div>
+          </div>
+        `;}).join('')}
+      </div>
+    `;
+  }).join('');
+
+  // 3. Render Maqueta Imprimible A4
+  const a4Container = document.getElementById('a4ColumnsContainer');
+  a4Container.innerHTML = cats.map(c => {
+    const catItems = items.filter(i => i.category === c);
+    if (!catItems.length) return '';
+    return `
+      <div class="a4-cat-block">
+        <div class="a4-cat-title">${CATEGORY_LABELS[c]}</div>
+        ${catItems.map(item => `
+          <div class="a4-row">
+            <div class="a4-row-top">
+              <span>${item.name}</span>
+              <span>${showPrices ? item.priceEur.toFixed(2).replace('.', ',') + ' €' : 'S/M'}</span>
+            </div>
+            <div class="a4-row-desc">${item.description}</div>
+            <div class="a4-row-meta">
+              ${showGrams ? `Peso neto: ${item.gramsNet}g · ` : ''}Alérgenos: ${item.allergens.map(id => OFFICIAL_ALLERGENS[id]?.icon + ' ' + OFFICIAL_ALLERGENS[id]?.name).join(', ')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+window.addEventListener('storage', function(e) {
+  if (e.key === 'tsukihana_inventory_v1') {
+    renderAllViews();
+  }
+});
+
+renderAllergenBar();
+renderAllViews();
+</script>
+</body>
+</html>

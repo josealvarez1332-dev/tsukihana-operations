@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsukihana · 04 Cabina Operativa de Pedidos, Mise en Place y Lanzamiento</title>
+<style>
+  :root {
+    --purple-deep: #140b24;
+    --purple-royal: #271447;
+    --purple-mid: #4c2382;
+    --purple-accent: #7c3aed;
+    --purple-soft: #ede4ff;
+    --paper: #f6f4f9;
+    --ink: #120e1a;
+    --muted: #5e546e;
+    --line: rgba(76, 35, 130, 0.14);
+  }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: var(--paper); color: var(--ink); padding: 20px; }
+
+  .top-nav {
+    background: #0d0718; color: #fff; padding: 10px 18px; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 16px; font-size: 12.5px;
+  }
+  .tool-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tool-links a {
+    color: #e9d5ff; text-decoration: none; padding: 5px 10px; border-radius: 7px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-weight: 600;
+  }
+  .tool-links a.active, .tool-links a:hover { background: var(--purple-soft); color: var(--purple-deep); }
+
+  .header {
+    background: linear-gradient(135deg, var(--purple-deep), var(--purple-royal));
+    color: #fff; border-radius: 18px; padding: 22px 28px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 18px; box-shadow: 0 12px 30px rgba(20, 11, 36, 0.16);
+  }
+  .header h1 { margin: 0 0 6px 0; font-size: 22px; letter-spacing: -0.02em; }
+  .header p { margin: 0; color: rgba(255,255,255,0.82); font-size: 13.5px; }
+  .quick-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-top {
+    background: #e9d5ff; color: var(--purple-deep); text-decoration: none; font-weight: 700;
+    padding: 9px 14px; border-radius: 10px; font-size: 12.5px; border: none; cursor: pointer;
+  }
+  .btn-top.secondary { background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
+
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 18px;
+  }
+  .stat-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px;
+  }
+  .stat-card .num { font-size: 24px; font-weight: 800; color: var(--purple-deep); }
+  .stat-card .lbl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+  /* TABS INTERNAS */
+  .mode-tabs {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .mode-tab {
+    padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); font-weight: 700; font-size: 13.5px; cursor: pointer;
+  }
+  .mode-tab.active {
+    background: var(--purple-deep); color: #fff; border-color: var(--purple-deep);
+  }
+
+  .controls {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;
+    background: #fff; padding: 14px; border-radius: 14px; border: 1px solid var(--line);
+  }
+  .controls input, .controls select {
+    padding: 9px 12px; border-radius: 9px; border: 1px solid var(--line); font-size: 13.5px;
+  }
+  .controls input { flex: 1; min-width: 220px; }
+
+  .table-wrap {
+    background: #fff; border-radius: 16px; border: 1px solid var(--line); overflow-x: auto;
+    box-shadow: 0 6px 20px rgba(20, 11, 36, 0.05);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--purple-deep); color: #fff; text-align: left; padding: 12px 10px;
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:hover td { background: #faf8fc; }
+
+  .badge {
+    display: inline-block; padding: 4px 9px; border-radius: 99px; font-size: 11px; font-weight: 700;
+  }
+  .b-pend { background: #fef3c7; color: #92400e; }
+  .b-conf { background: #dcfce7; color: #14532d; }
+  .b-prep { background: #ede4ff; color: #4c2382; }
+  .b-done { background: #e5e7eb; color: #374151; }
+
+  .act-btn {
+    padding: 6px 10px; border-radius: 7px; font-size: 11.5px; font-weight: 700; text-decoration: none;
+    cursor: pointer; border: 1px solid var(--line); background: var(--paper); color: var(--purple-deep);
+  }
+  .act-btn.wa { background: #dcfce7; color: #14532d; border-color: #86efac; }
+  .act-btn.script { background: var(--purple-deep); color: #e9d5ff; border-color: var(--purple-deep); }
+
+  .status-select {
+    padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; font-size: 12px; width: 100%;
+  }
+  .notes-input {
+    width: 100%; min-width: 180px; min-height: 52px; border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px; font-size: 12px; resize: vertical;
+  }
+
+  /* CHECKLIST Y MISE EN PLACE */
+  .grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+  .panel-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+  }
+  .panel-card h3 { margin-top: 0; color: var(--purple-deep); font-size: 17px; margin-bottom: 12px; }
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line);
+    font-size: 13.5px; cursor: pointer;
+  }
+  .check-row input { margin-top: 3px; accent-color: var(--purple-accent); transform: scale(1.15); }
+  .check-row.done span { text-decoration: line-through; color: var(--muted); }
+
+  /* MODAL GUION WHATSAPP */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(20, 11, 36, 0.6); z-index: 999;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal {
+    background: #fff; max-width: 680px; width: 100%; border-radius: 18px; padding: 26px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
+  }
+  .script-box {
+    background: var(--paper); border-left: 4px solid var(--purple-deep); padding: 16px; border-radius: 10px;
+    line-height: 1.55; font-size: 14px; margin: 14px 0; white-space: pre-wrap;
+  }
+
+  @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+  @media print {
+    .top-nav, .quick-links, .mode-tabs, .controls { display: none !important; }
+    body { background: #fff; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div><strong>TSUKIHANA · HERRAMIENTA OPERATIVA 04</strong> · Cabina de Pedidos, Mise en Place y Lanzamiento</div>
+  <div class="tool-links">
+    <a href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a href="index.html">🌸 Web Clientes</a> 
+    <a href="01_Vista_Previa_Interactiva_Tsukihana.html">🌸 01 Home Page</a>
+    <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">📖 05 Página Carta</a>
+    <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">⚖️ 06 Inventario y Gramaje</a>
+    <a href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html">🧮 02 Escandallos</a>
+    <a href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">📄 03 Dossier A4</a>
+    <a class="active" href="04_Cabina_Operativa_Pedidos_y_Lanzamiento_Tsukihana.html">🍱 04 Cabina Operativa</a>
+  </div>
+</div>
+
+<div class="header">
+  <div>
+    <h1>🍱 Tsukihana · Cabina Operativa de Pedidos, Producción y Lanzamiento (Vigo)</h1>
+    <p>Controla tus pedidos por turno, calcula el arroz Shari necesario al instante y verifica el checklist de lanzamiento.</p>
+  </div>
+  <div class="quick-links">
+    <button class="btn-top" onclick="addNewOrder()">➕ Nuevo Pedido / Consulta</button>
+    <button class="btn-top secondary" onclick="exportOrdersCSV()">⬇️ Exportar Pedidos (CSV)</button>
+    <button class="btn-top secondary" onclick="window.print()">🖨️ Imprimir Hoja de Turno (PDF)</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="num" id="statActiveOrders">0</div>
+    <div class="lbl">Pedidos / Consultas Turno</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" id="statTotalPieces">0 / 160</div>
+    <div class="lbl">Piezas Comprometidas (Cupo)</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" id="statShariGrams">0 g</div>
+    <div class="lbl">Arroz Crudo a Cocer Hoy</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" id="statLaunchPct">0 %</div>
+    <div class="lbl">Checklist Lanzamiento Web</div>
+  </div>
+</div>
+
+<div class="mode-tabs">
+  <button class="mode-tab active" onclick="switchTab('pedidos', this)">📋 1. Pedidos, Consultas y Guiones WhatsApp</button>
+  <button class="mode-tab" onclick="switchTab('miseenplace', this)">🔪 2. Calculadora de Mise en Place (Arroz Shari y Pescado)</button>
+  <button class="mode-tab" onclick="switchTab('lanzamiento', this)">🚀 3. Checklist Sanitario/Legal y Configuración Web</button>
+</div>
+
+<!-- TAB 1: PEDIDOS Y CONSULTAS -->
+<div id="tab-pedidos">
+  <div class="controls">
+    <input type="text" id="orderSearch" placeholder="🔍 Buscar por cliente, teléfono, plato o alergia..." oninput="renderOrders()">
+    <select id="statusFilter" onchange="renderOrders()">
+      <option value="todos">Todos los estados</option>
+      <option value="Pendiente confirmar">⏳ Pendiente confirmar</option>
+      <option value="Confirmado / Pagado">✅ Confirmado / Pagado</option>
+      <option value="En preparación">🔪 En preparación</option>
+      <option value="Entregado">🍱 Entregado</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código / Canal</th>
+          <th>Cliente y Teléfono</th>
+          <th>Turno / Zona Vigo</th>
+          <th>Detalle de Piezas / Alergias</th>
+          <th>Piezas</th>
+          <th>Estado del Pedido</th>
+          <th>Respuesta Rápida WhatsApp</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 2: CALCULADORA MISE EN PLACE -->
+<div id="tab-miseenplace" style="display:none;">
+  <div class="grid-2">
+    <div class="panel-card">
+      <h3>🌾 Calculadora Exacta de Shari (Arroz de Sushi) para el Turno</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Calcula las cantidades exactas de arroz seco, agua y aderezo <em>awasezu</em> según las piezas totales que vas a elaborar en el turno:</p>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:5px;">Total de piezas previstas en el turno:</label>
+        <input type="number" id="misePiecesInput" value="120" step="10" style="padding:9px 12px;border-radius:8px;border:1px solid var(--line);font-weight:800;font-size:15px;width:160px;" oninput="calcMiseEnPlace()">
+      </div>
+      <div id="shariBreakdown" style="display:grid;gap:10px;background:var(--paper);padding:16px;border-radius:12px;font-size:13.5px;"></div>
+    </div>
+
+    <div class="panel-card">
+      <h3>🐟 Previsión de Cortes y Materia Prima del Turno</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Estimación orientativa para no romper stock ni generar merma innecesaria:</p>
+      <div id="fishBreakdown" style="display:grid;gap:10px;background:var(--paper);padding:16px;border-radius:12px;font-size:13.5px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: CHECKLIST DE LANZAMIENTO Y SITE-CONFIG -->
+<div id="tab-lanzamiento" style="display:none;">
+  <div class="grid-2">
+    <div class="panel-card">
+      <h3>✅ Los 10 Requisitos Oficiales antes de Publicar (tsukihana_resumen_web.json)</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Marca cada punto a medida que lo tengas validado para el lanzamiento en Vigo:</p>
+      <div id="checklistContainer"></div>
+    </div>
+
+    <div class="panel-card">
+      <h3>⚙️ Datos de Contacto y Configuración Web (`site-config.ts`)</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Rellena tus datos cuando estén confirmados para generar el archivo de configuración de Next.js:</p>
+      <div style="display:grid;gap:10px;font-size:13px;">
+        <div>
+          <label style="font-weight:700;display:block;margin-bottom:3px;">Teléfono / WhatsApp Oficial (con prefijo 34):</label>
+          <input type="text" id="cfgWhatsapp" placeholder="Ej. 34600000000" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);">
+        </div>
+        <div>
+          <label style="font-weight:700;display:block;margin-bottom:3px;">Instagram:</label>
+          <input type="text" id="cfgInstagram" placeholder="Ej. @tsukihana.vigo" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);">
+        </div>
+        <div>
+          <label style="font-weight:700;display:block;margin-bottom:3px;">Zona de servicio confirmada:</label>
+          <input type="text" id="cfgArea" value="Vigo y alrededores (entrega y recogida previa reserva)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);">
+        </div>
+        <div>
+          <label style="font-weight:700;display:block;margin-bottom:3px;">Horarios y plazo mínimo de pedido:</label>
+          <input type="text" id="cfgHours" value="Jueves a Domingo · Pedidos con 24h de antelación" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);">
+        </div>
+        <button class="btn-top" style="margin-top:6px;background:var(--purple-deep);color:#fff;" onclick="generateSiteConfig()">📋 Generar código `site-config.ts` actualizado</button>
+        <pre id="siteConfigPreview" style="background:#140b24;color:#e9d5ff;padding:12px;border-radius:10px;font-size:11.5px;overflow-x:auto;display:none;"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GUION WHATSAPP -->
+<div class="modal-bg" id="waModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <h2 style="margin-top:0;color:var(--purple-deep);">💬 Respuesta Lista para WhatsApp · Tsukihana</h2>
+    <p style="font-size:13px;color:var(--muted);">Mensaje personalizado con confirmación de disponibilidad, verificación de alérgenos y detalles de entrega en Vigo:</p>
+    <div class="script-box" id="waScriptText" contenteditable="true"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-top" onclick="copyWaScript()">📋 Copiar Mensaje</button>
+      <button class="btn-top secondary" style="color:var(--ink);" onclick="document.getElementById('waModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_ORDERS = [
+  {
+    id: 'TSK-101',
+    channel: 'WhatsApp Directo',
+    client: 'Marta Gómez',
+    phone: '600112233',
+    slot: 'Viernes 21:00 h · Recogida Vigo Centro',
+    items: '1x Box Luna Llena Compartir (32 pzs) + 2x Nigiri Pez Mantequilla Trufa. Sin alergias.',
+    pieces: 36,
+    status: 'Confirmado / Pagado'
+  },
+  {
+    id: 'TSK-102',
+    channel: 'Formulario Web',
+    client: 'Carlos Méndez',
+    phone: '600445566',
+    slot: 'Sábado 20:30 h · Entrega Castro / Plaza América',
+    items: '2x Box Tsukihana Selección (16 pzs). ⚠️ AVISO: 1 comensal intolerante a la lactosa (verificar salsas).',
+    pieces: 32,
+    status: 'Pendiente confirmar'
+  },
+  {
+    id: 'TSK-103',
+    channel: 'Consulta Catering',
+    client: 'Elena Vázquez (Evento Privado)',
+    phone: '600778899',
+    slot: 'Sábado próximo 14:00 h · Alcabre (12 personas)',
+    items: 'Solicita Dossier de Catering y presupuesto de bandejas + nigiris flambeados para celebración familiar.',
+    pieces: 60,
+    status: 'Pendiente confirmar'
+  }
+];
+
+const CHECKLIST_ITEMS = [
+  '1. Requisitos sanitarios, APPCC y protocolo de congelación preventiva (anisakis) documentados',
+  '2. Carta inicial y precios definitivos validados en la Calculadora de Escandallos (Herramienta 02)',
+  '3. Alérgenos verificados plato por plato (10 iconos oficiales comprobados)',
+  '4. Número de teléfono y canal de WhatsApp Business activo para pedidos',
+  '5. Plazo mínimo de antelación, turnos y horarios de servicio definidos',
+  '6. Zonas de entrega en Vigo y alrededores (o punto de recogida) y coste de envío definidos',
+  '7. Métodos de pago iniciales confirmados (Bizum / Transferencia / Efectivo / Pasarela)',
+  '8. Fotografías reales propias de las piezas, cortes y elaboración (sin fotos genéricas)',
+  '9. Logotipo definitivo y recursos gráficos en paleta morado, blanco y negro',
+  '10. Textos legales revisados (Aviso legal, Privacidad, Cookies y Condiciones de compra)'
+];
+
+let orders = [];
+let checklistState = {};
+
+function loadAll() {
+  try {
+    const savedOrders = localStorage.getItem('tsukihana_orders_v1');
+    orders = savedOrders ? JSON.parse(savedOrders) : JSON.parse(JSON.stringify(DEFAULT_ORDERS));
+  } catch (e) {
+    orders = JSON.parse(JSON.stringify(DEFAULT_ORDERS));
+  }
+  try {
+    const savedCheck = localStorage.getItem('tsukihana_checklist_v1');
+    checklistState = savedCheck ? JSON.parse(savedCheck) : { 1: true, 2: true };
+  } catch (e) {
+    checklistState = { 1: true, 2: true };
+  }
+}
+
+function saveOrders() {
+  localStorage.setItem('tsukihana_orders_v1', JSON.stringify(orders));
+  updateStats();
+}
+
+function updateStats() {
+  const totalOrders = orders.length;
+  const totalPieces = orders.reduce((acc, o) => acc + (parseInt(o.pieces) || 0), 0);
+  const rawRiceGrams = Math.round(totalPieces * 11.5); // ~11.5g arroz crudo -> ~23g shari cocido por pieza media
+
+  const doneCount = Object.values(checklistState).filter(Boolean).length;
+  const pct = Math.round((doneCount / CHECKLIST_ITEMS.length) * 100);
+
+  document.getElementById('statActiveOrders').textContent = totalOrders;
+  document.getElementById('statTotalPieces').textContent = `${totalPieces} / 160`;
+  document.getElementById('statShariGrams').textContent = `${rawRiceGrams} g`;
+  document.getElementById('statLaunchPct').textContent = `${pct} %`;
+
+  document.getElementById('misePiecesInput').value = totalPieces || 120;
+  calcMiseEnPlace();
+}
+
+function renderOrders() {
+  const q = document.getElementById('orderSearch').value.toLowerCase();
+  const st = document.getElementById('statusFilter').value;
+  const tbody = document.getElementById('ordersBody');
+
+  tbody.innerHTML = orders.map((o, idx) => {
+    if (st !== 'todos' && o.status !== st) return '';
+    if (q && !(`${o.client} ${o.items} ${o.slot}`.toLowerCase().includes(q))) return '';
+
+    return `
+      <tr>
+        <td>
+          <strong>${o.id}</strong>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">${o.channel || 'Directo'}</div>
+        </td>
+        <td>
+          <input type="text" value="${o.client}" onchange="updateOrder(${idx}, 'client', this.value)" style="font-weight:700;border:1px solid var(--line);border-radius:6px;padding:4px 7px;width:100%;margin-bottom:4px;">
+          <input type="text" value="${o.phone || ''}" placeholder="Teléfono..." onchange="updateOrder(${idx}, 'phone', this.value)" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:4px 7px;width:100%;">
+        </td>
+        <td>
+          <input type="text" value="${o.slot}" onchange="updateOrder(${idx}, 'slot', this.value)" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:100%;">
+        </td>
+        <td>
+          <textarea class="notes-input" onchange="updateOrder(${idx}, 'items', this.value)">${o.items}</textarea>
+        </td>
+        <td>
+          <input type="number" value="${o.pieces || 16}" onchange="updateOrder(${idx}, 'pieces', parseInt(this.value)||0)" style="width:68px;padding:6px;border-radius:7px;border:1px solid var(--line);font-weight:800;text-align:right;">
+        </td>
+        <td>
+          <select class="status-select" onchange="updateOrder(${idx}, 'status', this.value)">
+            <option value="Pendiente confirmar" ${o.status==='Pendiente confirmar'?'selected':''}>⏳ Pendiente confirmar</option>
+            <option value="Confirmado / Pagado" ${o.status==='Confirmado / Pagado'?'selected':''}>✅ Confirmado / Pagado</option>
+            <option value="En preparación" ${o.status==='En preparación'?'selected':''}>🔪 En preparación</option>
+            <option value="Entregado" ${o.status==='Entregado'?'selected':''}>🍱 Entregado</option>
+          </select>
+          <button onclick="deleteOrder(${idx})" style="margin-top:6px;font-size:11px;color:#991b1b;background:none;border:none;cursor:pointer;">🗑️ Borrar</button>
+        </td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button class="act-btn script" onclick="openWaModal(${idx})">💬 Generar Guion Respuesta</button>
+            <a class="act-btn wa" href="https://wa.me/34${(o.phone||'').replace(/\D/g,'')}" target="_blank">📲 Abrir WhatsApp</a>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateOrder(idx, field, val) {
+  orders[idx][field] = val;
+  saveOrders();
+  renderOrders();
+}
+
+function addNewOrder() {
+  orders.unshift({
+    id: 'TSK-' + Math.floor(100 + Math.random() * 900),
+    channel: 'WhatsApp Directo',
+    client: 'Nuevo Cliente Vigo',
+    phone: '600000000',
+    slot: 'Sábado 21:00 h · Vigo',
+    items: '1x Box Tsukihana Selección (16 pzs). Alérgenos verificados.',
+    pieces: 16,
+    status: 'Pendiente confirmar'
+  });
+  saveOrders();
+  renderOrders();
+}
+
+function deleteOrder(idx) {
+  if (confirm('¿Eliminar este pedido de la cabina?')) {
+    orders.splice(idx, 1);
+    saveOrders();
+    renderOrders();
+  }
+}
+
+function openWaModal(idx) {
+  const o = orders[idx];
+  const msg = `¡Hola ${o.client}! 🌸 Te escribimos desde *Tsukihana (Sushi Artesanal en Vigo)*.\n\n` +
+    `Hemos recibido tu solicitud (${o.id}) para el turno:\n` +
+    `🗓️ *${o.slot}*\n` +
+    `🍱 *Selección:* ${o.items}\n\n` +
+    `✅ Te confirmamos disponibilidad en nuestro cupo de elaboración artesanal para esa hora.\n` +
+    `🛡️ *Seguridad alimentaria y alérgenos:* Preparamos todas las piezas al momento antes de tu turno. Por favor, confírmanos si hay alguna alergia o intolerancia adicional que debamos contemplar.\n\n` +
+    `¿Te viene bien que dejemos reservado tu turno?`;
+  document.getElementById('waScriptText').textContent = msg;
+  document.getElementById('waModal').style.display = 'flex';
+}
+
+function copyWaScript() {
+  navigator.clipboard.writeText(document.getElementById('waScriptText').textContent);
+  alert('¡Mensaje de WhatsApp copiado al portapapeles!');
+}
+
+function calcMiseEnPlace() {
+  const pieces = parseInt(document.getElementById('misePiecesInput').value) || 0;
+  const rawRice = Math.round(pieces * 11.5);
+  const waterMl = Math.round(rawRice * 1.12);
+  const awasezuMl = Math.round(rawRice * 0.22);
+  const cookedShari = Math.round(rawRice * 2.1);
+
+  document.getElementById('shariBreakdown').innerHTML = `
+    <div>🌾 <strong>Arroz japonés en crudo (lavado 4 aguas):</strong> ${rawRice} g (${(rawRice/1000).toFixed(2)} kg)</div>
+    <div>💧 <strong>Agua mineral para cocción (ratio 1:1,12):</strong> ${waterMl} ml + 1 trozo alga Kombu</div>
+    <div>🍶 <strong>Aderezo Sushi-zu / Awasezu templado:</strong> ${awasezuMl} ml</div>
+    <div>🍚 <strong>Rendimiento total Shari abanicado:</strong> ~${cookedShari} g listos para ${pieces} piezas</div>
+  `;
+
+  const salmonG = Math.round(pieces * 6.5);
+  const tunaG = Math.round(pieces * 4.2);
+  const avocadoG = Math.round(pieces * 3.8);
+  const noriSheets = Math.ceil(pieces / 7);
+
+  document.getElementById('fishBreakdown').innerHTML = `
+    <div>🐟 <strong>Salmón limpio en lomos (nigiri + uramaki):</strong> ~${salmonG} g netos</div>
+    <div>🍣 <strong>Atún limpio (nigiri + tartar gunkan):</strong> ~${tunaG} g netos</div>
+    <div>🥑 <strong>Aguacate / vegetales de relleno:</strong> ~${avocadoG} g</div>
+    <div>🎋 <strong>Hojas de Alga Nori Gold:</strong> ~${noriSheets} hojas enteras</div>
+  `;
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklistContainer');
+  container.innerHTML = CHECKLIST_ITEMS.map((txt, i) => {
+    const done = !!checklistState[i];
+    return `
+      <label class="check-row ${done ? 'done' : ''}">
+        <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleCheck(${i}, this.checked)">
+        <span>${txt}</span>
+      </label>
+    `;
+  }).join('');
+}
+
+function toggleCheck(i, val) {
+  checklistState[i] = val;
+  localStorage.setItem('tsukihana_checklist_v1', JSON.stringify(checklistState));
+  renderChecklist();
+  updateStats();
+}
+
+function generateSiteConfig() {
+  const wa = document.getElementById('cfgWhatsapp').value.trim();
+  const ig = document.getElementById('cfgInstagram').value.trim();
+  const area = document.getElementById('cfgArea').value.trim();
+  const hours = document.getElementById('cfgHours').value.trim();
+
+  const code = `export const siteConfig = {\n` +
+    `  brand: {\n` +
+    `    name: 'Tsukihana',\n` +
+    `    tagline: 'Sushi artesanal con técnica, respeto por el producto y alma en cada pieza.',\n` +
+    `    city: 'Vigo',\n` +
+    `    region: 'Galicia',\n` +
+    `    serviceArea: '${area}',\n` +
+    `  },\n` +
+    `  featureFlags: {\n` +
+    `    showPrices: true,\n` +
+    `    enableDirectOrders: ${wa ? 'true' : 'false'},\n` +
+    `    enableWhatsAppButton: ${wa ? 'true' : 'false'},\n` +
+    `    enableCateringPage: true,\n` +
+    `  },\n` +
+    `  contact: {\n` +
+    `    phone: ${wa ? `'${wa}'` : 'null'},\n` +
+    `    whatsapp: ${wa ? `'${wa}'` : 'null'},\n` +
+    `    email: null,\n` +
+    `    instagram: ${ig ? `'${ig}'` : 'null'},\n` +
+    `    openingHours: ['${hours}'],\n` +
+    `  },\n` +
+    `};\n`;
+
+  const pre = document.getElementById('siteConfigPreview');
+  pre.style.display = 'block';
+  pre.textContent = code;
+}
+
+function switchTab(tabId, btn) {
+  ['pedidos', 'miseenplace', 'lanzamiento'].forEach(id => {
+    document.getElementById('tab-' + id).style.display = (id === tabId) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function exportOrdersCSV() {
+  const headers = ['ID','Canal','Cliente','Telefono','Turno_Zona','Detalle_Pedido','Piezas','Estado'];
+  const rows = orders.map(o => [
+    o.id, `"${o.channel||''}"`, `"${o.client||''}"`, `"${o.phone||''}"`,
+    `"${o.slot||''}"`, `"${(o.items||'').replace(/"/g, '""')}"`, o.pieces||0, `"${o.status||''}"`
+  ].join(';'));
+  const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Pedidos_Turno_Tsukihana_Vigo.csv';
+  a.click();
+}
+
+loadAll();
+renderOrders();
+renderChecklist();
+updateStats();
+</script>
+</body>
+</html>

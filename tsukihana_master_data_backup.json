@@ -1,0 +1,346 @@
+{
+  "backup_metadata": {
+    "generated_at": "2026-10-17T19:35:27.876986",
+    "project": "Tsukihana (月花) · Sushi Artesanal Vigo",
+    "version": "2.0-Production-Ready",
+    "status": "Ready for Deployment (Opción A)"
+  },
+  "business_profile": {
+    "legal_name": "Tsukihana Sushi Artesanal",
+    "trade_name": "Tsukihana · 月花",
+    "tagline": "Flor de Luna · Sushi Artesanal y Omakase en Vigo",
+    "location": {
+      "city": "Vigo",
+      "province": "Pontevedra",
+      "region": "Galicia",
+      "country": "España",
+      "service_area": [
+        "Vigo Centro",
+        "Bouzas",
+        "Samil",
+        "Canido",
+        "Teis",
+        "Baiona",
+        "Nigrán",
+        "Sanxenxo"
+      ]
+    },
+    "contact": {
+      "official_phone": "+34 655 35 07 09",
+      "official_whatsapp": "+34 655 35 07 09",
+      "whatsapp_link": "https://wa.me/34655350709",
+      "whatsapp_prefilled_order": "https://wa.me/34655350709?text=Hola%20Tsukihana!%20Quiero%20confirmar%20mi%20reserva"
+    },
+    "external_integrations": {
+      "reservalo_saas": {
+        "provider": "Resérvalo España",
+        "base_url": "https://reservalo.es",
+        "status": "Conectado a nivel de interfaz / Pendiente de slug propio"
+      }
+    }
+  },
+  "operational_rates": {
+    "chef_hourly_rate_eur": 18.99,
+    "chef_hourly_rate_note": "Ajustado a 18.99 EUR/h para rentabilidad y competitividad en Vigo",
+    "travel_zones_eur": {
+      "vigo_urbano": 0.0,
+      "baiona_nigran": 15.0,
+      "sanxenxo_pontevedra": 35.0,
+      "barco_ria_vigo": 60.0
+    },
+    "average_food_cost_target_pct": 28.5,
+    "minimum_gross_margin_target_pct": 71.5
+  },
+  "full_menu_catalog_16_items": [
+    {
+      "id": "pack-tsukihana-16",
+      "name": "Box Tsukihana Selección (16 pzs)",
+      "category": "packs",
+      "pieces": 16,
+      "price_eur": 26.5,
+      "description": "4 nigiris de autor, 8 uramakis y 4 hosomakis",
+      "allergens": [
+        "pescado",
+        "soja",
+        "sesamo",
+        "gluten",
+        "crustaceos"
+      ],
+      "food_cost_eur": 7.42,
+      "food_cost_pct": 28.0
+    },
+    {
+      "id": "pack-luna-llena-32",
+      "name": "Box Luna Llena (32 pzs)",
+      "category": "packs",
+      "pieces": 32,
+      "price_eur": 52.0,
+      "description": "Box para compartir: 10 nigiris, 16 uramakis y 6 sashimi de temporada",
+      "allergens": [
+        "pescado",
+        "soja",
+        "sesamo",
+        "gluten",
+        "crustaceos",
+        "moluscos"
+      ],
+      "food_cost_eur": 14.56,
+      "food_cost_pct": 28.0
+    },
+    {
+      "id": "pack-nigiri-omakase-10",
+      "name": "Box Nigiri Omakase (10 pzs)",
+      "category": "packs",
+      "pieces": 10,
+      "price_eur": 22.0,
+      "description": "10 nigiris de autor con pescados nobles marinados y pincelados con nikiri casero",
+      "allergens": [
+        "pescado",
+        "soja",
+        "gluten"
+      ],
+      "food_cost_eur": 6.16,
+      "food_cost_pct": 28.0
+    },
+    {
+      "id": "nigiri-salmon-aburi-2",
+      "name": "Nigiri Salmón Aburi con Miso Dulce (2 pzs)",
+      "category": "nigiris",
+      "pieces": 2,
+      "price_eur": 5.5,
+      "allergens": [
+        "pescado",
+        "soja",
+        "gluten"
+      ],
+      "food_cost_eur": 1.48,
+      "food_cost_pct": 26.9
+    },
+    {
+      "id": "nigiri-atun-balfego-2",
+      "name": "Nigiri Atún Rojo Balfegó (2 pzs)",
+      "category": "nigiris",
+      "pieces": 2,
+      "price_eur": 6.5,
+      "allergens": [
+        "pescado",
+        "soja",
+        "gluten"
+      ],
+      "food_cost_eur": 1.88,
+      "food_cost_pct": 28.9
+    },
+    {
+      "id": "nigiri-mantequilla-trufa-2",
+      "name": "Nigiri Pez Mantequilla Trufado (2 pzs)",
+      "category": "nigiris",
+      "pieces": 2,
+      "price_eur": 5.8,
+      "allergens": [
+        "pescado",
+        "soja"
+      ],
+      "food_cost_eur": 1.56,
+      "food_cost_pct": 26.9
+    },
+    {
+      "id": "nigiri-vieira-ria-2",
+      "name": "Nigiri Vieira de la Ría con Lima (2 pzs)",
+      "category": "nigiris",
+      "pieces": 2,
+      "price_eur": 6.8,
+      "allergens": [
+        "moluscos",
+        "soja"
+      ],
+      "food_cost_eur": 1.95,
+      "food_cost_pct": 28.7
+    },
+    {
+      "id": "uramaki-dragon-tsuki-8",
+      "name": "Uramaki Dragón Tsuki (8 pzs)",
+      "category": "uramakis",
+      "pieces": 8,
+      "price_eur": 14.5,
+      "allergens": [
+        "crustaceos",
+        "pescado",
+        "soja",
+        "sesamo",
+        "gluten"
+      ],
+      "food_cost_eur": 3.92,
+      "food_cost_pct": 27.0
+    },
+    {
+      "id": "uramaki-salmon-phila-8",
+      "name": "Uramaki Salmón y Crema Suave (8 pzs)",
+      "category": "uramakis",
+      "pieces": 8,
+      "price_eur": 12.5,
+      "allergens": [
+        "pescado",
+        "lacteos",
+        "sesamo",
+        "soja"
+      ],
+      "food_cost_eur": 3.35,
+      "food_cost_pct": 26.8
+    },
+    {
+      "id": "uramaki-spicy-tuna-8",
+      "name": "Uramaki Spicy Tuna Crunch (8 pzs)",
+      "category": "uramakis",
+      "pieces": 8,
+      "price_eur": 13.8,
+      "allergens": [
+        "pescado",
+        "huevo",
+        "sesamo",
+        "soja",
+        "gluten"
+      ],
+      "food_cost_eur": 3.86,
+      "food_cost_pct": 28.0
+    },
+    {
+      "id": "uramaki-rainbow-gallego-8",
+      "name": "Uramaki Rainbow Gallego (8 pzs)",
+      "category": "uramakis",
+      "pieces": 8,
+      "price_eur": 15.0,
+      "allergens": [
+        "pescado",
+        "crustaceos",
+        "sesamo",
+        "soja"
+      ],
+      "food_cost_eur": 4.35,
+      "food_cost_pct": 29.0
+    },
+    {
+      "id": "hosomaki-atun-akami-6",
+      "name": "Hosomaki Atún Rojo Akami (6 pzs)",
+      "category": "hosomakis",
+      "pieces": 6,
+      "price_eur": 7.5,
+      "allergens": [
+        "pescado",
+        "soja"
+      ],
+      "food_cost_eur": 2.05,
+      "food_cost_pct": 27.3
+    },
+    {
+      "id": "hosomaki-aguacate-pepino-6",
+      "name": "Hosomaki Aguacate y Pepino Holandés (6 pzs)",
+      "category": "hosomakis",
+      "pieces": 6,
+      "price_eur": 5.5,
+      "allergens": [
+        "sesamo"
+      ],
+      "food_cost_eur": 1.15,
+      "food_cost_pct": 20.9
+    },
+    {
+      "id": "gunkan-tartar-salmon-ikura-2",
+      "name": "Gunkan Tartar Salmón e Ikura (2 pzs)",
+      "category": "especiales",
+      "pieces": 2,
+      "price_eur": 7.0,
+      "allergens": [
+        "pescado",
+        "soja"
+      ],
+      "food_cost_eur": 2.03,
+      "food_cost_pct": 29.0
+    },
+    {
+      "id": "sashimi-moriawase-12",
+      "name": "Sashimi Moriawase Trilogía (12 cortes)",
+      "category": "especiales",
+      "pieces": 12,
+      "price_eur": 19.5,
+      "allergens": [
+        "pescado",
+        "soja"
+      ],
+      "food_cost_eur": 5.85,
+      "food_cost_pct": 30.0
+    },
+    {
+      "id": "tartar-atun-crujiente-nori",
+      "name": "Tartar Atún Rojo sobre Crujiente Nori",
+      "category": "especiales",
+      "pieces": 1,
+      "price_eur": 14.5,
+      "allergens": [
+        "pescado",
+        "sesamo",
+        "soja",
+        "gluten"
+      ],
+      "food_cost_eur": 4.06,
+      "food_cost_pct": 28.0
+    }
+  ],
+  "inventory_and_barcode_scanner": {
+    "scanner_modes": [
+      "HID Wedge Teclado USB/Bluetooth",
+      "Cámara Web / Móvil"
+    ],
+    "audio_feedback": "Web Audio API Synth Beep (Láser POS)",
+    "raw_ingredients_stock_reference": {
+      "salmon_fresco_limpio": {
+        "stock_g": 1850,
+        "cost_eur_kg": 26.5,
+        "yield_pct": 68
+      },
+      "atun_rojo_balfego": {
+        "stock_g": 1200,
+        "cost_eur_kg": 42.0,
+        "yield_pct": 85
+      },
+      "pez_mantequilla": {
+        "stock_g": 800,
+        "cost_eur_kg": 22.0,
+        "yield_pct": 78
+      },
+      "vieiras_de_ria": {
+        "stock_g": 600,
+        "cost_eur_kg": 38.0,
+        "yield_pct": 90
+      },
+      "arroz_shari_sushi": {
+        "stock_g": 4500,
+        "cost_eur_kg": 4.2,
+        "yield_pct": 100
+      },
+      "aguacate_hass": {
+        "stock_g": 1500,
+        "cost_eur_kg": 6.5,
+        "yield_pct": 70
+      },
+      "cajas_packaging_ecologico": {
+        "stock_units": 85,
+        "cost_eur_unit": 1.1
+      }
+    }
+  },
+  "file_directory_structure": {
+    "production_folder": "/Users/juuso/Desktop/Tsukihana_Web_Produccion",
+    "public_customer_file": "index.html",
+    "private_staff_portal": "operaciones.html",
+    "modules": {
+      "02": "Calculadora de Escandallos y Rentabilidad",
+      "03": "Dossier Catering y Cotizador Omakase (Chef 18.99 €/h)",
+      "04": "Cabina Operativa de Pedidos y Calculadora Shari",
+      "05": "Carta Oficial 16 referencias, Móvil QR y A4",
+      "06": "Gestor de Inventario y Gramajes",
+      "07": "Panel de Turnos e Integración Resérvalo",
+      "08": "Simulador iPhone App Cliente y Cocina",
+      "09": "Terminal ScanStock de Códigos de Barras"
+    }
+  }
+}

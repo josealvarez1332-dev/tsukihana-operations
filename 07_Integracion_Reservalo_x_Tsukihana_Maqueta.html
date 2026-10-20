@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsukihana × Resérvalo · 07 Panel Visual de Reservas y Turnos</title>
+<style>
+  :root {
+    --bg-main: #fff8fc;
+    --purple-dark: #240a3d;
+    --purple-mid: #6d28d9;
+    --fuchsia: #db2777;
+    --pink-soft: #fdf2f8;
+    --grad-brand: linear-gradient(135deg, #2d0d4e 0%, #6d28d9 48%, #db2777 100%);
+    --grad-cta: linear-gradient(135deg, #db2777 0%, #7e22ce 100%);
+    --res-forest: #10362f;
+    --res-lime: #c7ee96;
+    --ink: #1b0c29;
+    --muted: #645375;
+    --line: rgba(109, 40, 217, 0.14);
+    --shadow-soft: 0 12px 30px rgba(36, 10, 61, 0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg-main); color: var(--ink); padding: 18px; line-height: 1.5; }
+
+  /* BARRA DE NAVEGACIÓN */
+  .top-nav {
+    background: #140624; color: #fff; padding: 10px 18px; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 16px; font-size: 12px;
+  }
+  .tool-links { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tool-links a {
+    color: #fbcfe8; text-decoration: none; padding: 5px 9px; border-radius: 7px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-weight: 600;
+  }
+  .tool-links a.active, .tool-links a:hover { background: #fff; color: var(--purple-dark); }
+
+  /* CABECERA LIMPIA CON SELECTOR DE VISTA */
+  .header-banner {
+    background: var(--grad-brand); color: #fff; border-radius: 22px; padding: 24px 28px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 20px; box-shadow: 0 14px 34px rgba(109, 40, 217, 0.2);
+  }
+  .header-banner h1 { font-size: 24px; font-family: "Georgia", serif; font-weight: 400; margin-bottom: 4px; }
+  .header-banner p { font-size: 13.5px; color: rgba(255,255,255,0.9); }
+
+  .view-switcher {
+    background: rgba(255,255,255,0.14); padding: 5px; border-radius: 14px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .v-btn {
+    padding: 9px 15px; border-radius: 10px; border: none; background: transparent;
+    color: #fff; font-weight: 800; font-size: 12.5px; cursor: pointer;
+  }
+  .v-btn.active { background: #fff; color: var(--purple-dark); }
+
+  /* LAYOUT PRINCIPAL */
+  .workspace {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start;
+  }
+  .workspace.single-col {
+    grid-template-columns: 1fr; max-width: 820px; margin: 0 auto;
+  }
+
+  .card-panel {
+    background: #fff; border-radius: 24px; border: 1.5px solid var(--line); padding: 26px;
+    box-shadow: var(--shadow-soft);
+  }
+  .panel-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 800;
+    margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  /* =========================================================
+     COLUMNA 1: RESERVA FÁCIL EN 3 PASOS (VISTA CLIENTE)
+     ========================================================= */
+  .step-block { margin-bottom: 20px; }
+  .step-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .step-circle {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--grad-cta); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;
+  }
+  .step-head strong { font-size: 15px; color: var(--purple-dark); }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mode-card {
+    padding: 12px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .mode-card.active {
+    border: 2px solid var(--fuchsia); background: var(--pink-soft);
+  }
+
+  .day-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+  .day-pill {
+    padding: 9px 6px; border-radius: 11px; border: 1px solid var(--line); background: #fff;
+    font-weight: 700; font-size: 12px; cursor: pointer; text-align: center;
+  }
+  .day-pill.active { background: var(--grad-cta); color: #fff; border-color: transparent; }
+
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .time-card {
+    padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+  }
+  .time-card.selected { border: 2px solid var(--fuchsia); background: var(--pink-soft); }
+  .time-card.closed { opacity: 0.45; cursor: not-allowed; background: #f3f4f6; }
+
+  .item-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 14px; border-radius: 14px; border: 1px solid var(--line); margin-bottom: 8px;
+  }
+  .qty-btn {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line);
+    background: #fff; font-weight: 800; font-size: 16px; cursor: pointer;
+  }
+  .qty-btn.plus { background: var(--grad-cta); color: #fff; border: none; }
+
+  .confirm-bar {
+    background: var(--grad-brand); color: #fff; border-radius: 18px; padding: 18px 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px;
+  }
+  .btn-confirm {
+    background: #fff; color: var(--purple-dark); border: none; padding: 12px 22px;
+    border-radius: 99px; font-weight: 800; font-size: 14px; cursor: pointer;
+  }
+
+  /* =========================================================
+     COLUMNA 2: PANEL DEL RESTAURANTE (TURNOS, RESERVAS Y STOCK)
+     ========================================================= */
+  .slot-control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .slot-control-card {
+    background: #faf8fc; border: 1px solid var(--line); border-radius: 16px; padding: 14px;
+  }
+  .progress-bg {
+    height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; margin: 8px 0;
+  }
+  .progress-fill {
+    height: 100%; background: var(--grad-cta); border-radius: 99px; transition: width 0.3s;
+  }
+
+  .booking-card {
+    background: var(--pink-soft); border: 1px solid rgba(219,39,119,0.2); border-radius: 14px;
+    padding: 13px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+
+  .stock-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stock-mini-card {
+    background: #faf8fc; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12.5px;
+  }
+
+  @media (max-width: 960px) { .workspace { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div><strong>TSUKIHANA × RESÉRVALO · 07</strong> · Panel Visual e Intuitivo de Reservas</div>
+  <div class="tool-links">
+    <a href="operaciones.html" style="background:linear-gradient(135deg,#db2777,#6d28d9);color:#fff;font-weight:800;border:none;">🏠 Hub Operaciones</a> <a href="index.html">🌸 Web Clientes</a> 
+    <a href="01_Vista_Previa_Interactiva_Tsukihana.html">🌸 01 Home Page</a>
+    <a href="05_Pagina_Carta_y_Maquetas_Tsukihana.html">📖 05 Página Carta</a>
+    <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html">⚖️ 06 Inventario y Gramaje</a>
+    <a class="active" href="07_Integracion_Reservalo_x_Tsukihana_Maqueta.html">🔗 07 Panel Reservas</a>
+    <a href="08_App_Movil_Tsukihana_Maqueta.html">📱 08 App Móvil</a>
+    <a href="09_App_Escaneado_Inventario_x_Tsukihana.html">🔫 09 App Escáner Stock</a>
+    <a href="02_Calculadora_Escandallos_y_Carta_Tsukihana.html">🧮 02 Escandallos</a>
+    <a href="03_Dossier_Catering_y_Experiencias_Editable_Tsukihana.html">📄 03 Dossier A4</a>
+    <a href="04_Cabina_Operativa_Pedidos_y_Lanzamiento_Tsukihana.html">🍱 04 Cabina Pedidos</a>
+  </div>
+</div>
+
+<div class="header-banner">
+  <div>
+    <h1>📅 Panel Intuitivo de Reservas · Tsukihana × Resérvalo</h1>
+    <p>Prueba a hacer una reserva en 3 clics (izquierda) y mira cómo se actualiza tu cocina y tus turnos al instante (derecha).</p>
+  </div>
+  <div class="view-switcher">
+    <button class="v-btn active" onclick="setLayoutMode('both', this)">🔀 Ver Ambos a la vez</button>
+    <button class="v-btn" onclick="setLayoutMode('client', this)">👤 Solo Vista Cliente</button>
+    <button class="v-btn" onclick="setLayoutMode('admin', this)">🖥️ Solo Panel Restaurante</button>
+  </div>
+</div>
+
+<div class="workspace" id="mainWorkspace">
+
+  <!-- LADO 1: ASÍ RESERVA EL CLIENTE EN 3 PASOS SENCILLOS -->
+  <div class="card-panel" id="panelClient">
+    <span class="panel-badge" style="background:var(--pink-soft);color:var(--fuchsia);">👤 Vista del Cliente en la Web de Tsukihana</span>
+    <h2 style="font-family:Georgia,serif;font-size:24px;color:var(--purple-dark);margin-bottom:18px;">Reserva en 3 pasos sencillos</h2>
+
+    <!-- PASO 1 -->
+    <div class="step-block">
+      <div class="step-head">
+        <span class="step-circle">1</span>
+        <strong>¿Qué quieres reservar hoy?</strong>
+      </div>
+      <div class="mode-grid">
+        <div class="mode-card active" id="mc-boxes" onclick="changeExp('boxes')">
+          <div style="font-size:22px;">🍱</div>
+          <strong style="font-size:13px;display:block;color:var(--purple-dark);">Pedir Sushi</strong>
+          <span style="font-size:11px;color:var(--muted);">Recogida / Entrega</span>
+        </div>
+        <div class="mode-card" id="mc-omakase" onclick="changeExp('omakase')">
+          <div style="font-size:22px;">🌙</div>
+          <strong style="font-size:13px;display:block;color:var(--purple-dark);">Barra Omakase</strong>
+          <span style="font-size:11px;color:var(--muted);">Cena en vivo (8 pl.)</span>
+        </div>
+        <div class="mode-card" id="mc-catering" onclick="changeExp('catering')">
+          <div style="font-size:22px;">🥂</div>
+          <strong style="font-size:13px;display:block;color:var(--purple-dark);">Catering Evento</strong>
+          <span style="font-size:11px;color:var(--muted);">Celebración privada</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="step-block">
+      <div class="step-head">
+        <span class="step-circle">2</span>
+        <strong>Elige el día y una hora libre</strong>
+      </div>
+      <div class="day-grid" id="dayButtons">
+        <button class="day-pill active" onclick="pickDay('Viernes 23 Oct', this)">Vie 23 Oct</button>
+        <button class="day-pill" onclick="pickDay('Sábado 24 Oct', this)">Sáb 24 Oct</button>
+        <button class="day-pill" onclick="pickDay('Domingo 25 Oct', this)">Dom 25 Oct</button>
+        <button class="day-pill" onclick="pickDay('Viernes 30 Oct', this)">Vie 30 Oct</button>
+      </div>
+      <div class="time-grid" id="clientTimeGrid"></div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="step-block">
+      <div class="step-head">
+        <span class="step-circle">3</span>
+        <strong>Elige las unidades y tu nombre</strong>
+      </div>
+      <div id="clientItemsList"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+        <input type="text" id="cName" value="Marta Gómez (Vigo)" placeholder="Tu nombre" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);font-weight:700;">
+        <select id="cAllergy" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);font-weight:700;background:var(--bg-main);">
+          <option value="Sin alergias">✓ Ninguna alergia</option>
+          <option value="Sin gluten">🌾 Sin gluten</option>
+          <option value="Sin lactosa">🥛 Sin lactosa</option>
+          <option value="Sin marisco">🦐 Sin marisco</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- BOTÓN CONFIRMAR -->
+    <div class="confirm-bar">
+      <div>
+        <div id="cSummaryLabel" style="font-size:12px;color:#fbcfe8;font-weight:700;">Viernes 23 Oct · 20:00 h</div>
+        <div id="cTotalLabel" style="font-size:24px;font-weight:800;">26,50 € <span style="font-size:11px;font-weight:500;opacity:0.85;">(0% comisión)</span></div>
+      </div>
+      <button class="btn-confirm" onclick="confirmBooking()">🌸 Confirmar Reserva →</button>
+    </div>
+  </div>
+
+  <!-- LADO 2: TU PANEL DE CONTROL DEL RESTAURANTE (SÚPER VISUAL) -->
+  <div class="card-panel" id="panelAdmin">
+    <span class="panel-badge" style="background:var(--res-lime);color:var(--res-forest);">🖥️ Tu Panel de Control (Restaurante Tsukihana)</span>
+    <h2 style="font-family:Georgia,serif;font-size:24px;color:var(--purple-dark);margin-bottom:6px;">Control de Turnos, Reservas y Stock</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Abre o cierra horas con un clic y revisa qué tienes que preparar en cada turno:</p>
+
+    <!-- 1. SEMÁFORO VISUAL DE TURNOS -->
+    <strong style="font-size:12.5px;text-transform:uppercase;color:var(--purple-dark);display:block;margin-bottom:8px;">🕒 1. Estado de tus Turnos de Hoy (Clic para Abrir / Cerrar)</strong>
+    <div class="slot-control-grid" id="adminSlotsGrid"></div>
+
+    <!-- 2. ÚLTIMAS RESERVAS RECIBIDAS -->
+    <strong style="font-size:12.5px;text-transform:uppercase;color:var(--purple-dark);display:block;margin-bottom:8px;">📋 2. Reservas Confirmadas en este Turno</strong>
+    <div id="adminBookingsList" style="margin-bottom:18px;"></div>
+
+    <!-- 3. BARRAS DE STOCK EN NEVERA -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <strong style="font-size:12.5px;text-transform:uppercase;color:var(--purple-dark);">❄️ 3. Stock Disponible en Cocina (Se descuenta solo)</strong>
+      <a href="06_Gestor_Inventario_y_Calculadora_Gramaje_Tsukihana.html" style="font-size:11.5px;font-weight:800;color:var(--fuchsia);text-decoration:none;">Ir a Inventario Completo (06) →</a>
+    </div>
+    <div class="stock-mini-grid" id="adminStockBars"></div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {
+  boxes: {
+    unit: 'piezas',
+    slots: [
+      { id: 's1', time: '20:00 h', used: 16, max: 64, open: true },
+      { id: 's2', time: '20:30 h', used: 32, max: 64, open: true },
+      { id: 's3', time: '21:15 h', used: 48, max: 64, open: true },
+      { id: 's4', time: '22:00 h', used: 64, max: 64, open: false }
+    ],
+    items: [
+      { id: 'b16', name: 'Box Tsukihana Selección (16 pzs)', price: 26.50, quota: 16, qty: 1, grams: { salmon: 65, atun: 36, arroz_crudo: 124, aguacate: 35 } },
+      { id: 'b32', name: 'Box Luna Llena Compartir (32 pzs)', price: 49.00, quota: 32, qty: 0, grams: { salmon: 130, atun: 82, arroz_crudo: 245, aguacate: 75 } }
+    ]
+  },
+  omakase: {
+    unit: 'plazas',
+    slots: [
+      { id: 'o1', time: '20:30 h (Pase 1)', used: 2, max: 8, open: true },
+      { id: 'o2', time: '22:15 h (Pase 2)', used: 0, max: 8, open: true }
+    ],
+    items: [
+      { id: 'om1', name: 'Plaza Menú Omakase (14 pases)', price: 65.00, quota: 1, qty: 2, grams: { salmon: 80, atun: 75, arroz_crudo: 110, aguacate: 30 } },
+      { id: 'om2', name: 'Maridaje Sake & Blanco Rías Baixas', price: 22.00, quota: 0, qty: 0, grams: {} }
+    ]
+  },
+  catering: {
+    unit: 'evento',
+    slots: [
+      { id: 'c1', time: 'Mediodía · 13:30 h', used: 0, max: 1, open: true },
+      { id: 'c2', time: 'Noche · 21:00 h', used: 0, max: 1, open: true }
+    ],
+    items: [
+      { id: 'cat1', name: 'Catering Bandejas Eventos (15 pers.)', price: 390.00, quota: 1, qty: 1, grams: { salmon: 850, atun: 550, arroz_crudo: 1400, aguacate: 450 } }
+    ]
+  }
+};
+
+let currentExp = 'boxes';
+let currentDay = 'Viernes 23 Oct';
+let currentSlotId = 's1';
+let recentBookings = [
+  { code: 'RES-901', client: 'Carlos Méndez', time: 'Viernes 23 Oct · 20:30 h', summary: '2x Box Tsukihana Selección (32 pzs)', allergy: '🥛 Sin lactosa', total: '53,00 €' }
+];
+let stockState = {
+  salmon: { name: '🐟 Salmón Limpio', val: 2400, max: 3000 },
+  atun: { name: '🍣 Atún Rojo', val: 1250, max: 1500 },
+  arroz_crudo: { name: '🌾 Arroz Japonés', val: 8500, max: 10000 },
+  aguacate: { name: '🥑 Aguacate', val: 1100, max: 1500 }
+};
+
+function setLayoutMode(mode, btn) {
+  document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const ws = document.getElementById('mainWorkspace');
+  const pClient = document.getElementById('panelClient');
+  const pAdmin = document.getElementById('panelAdmin');
+
+  if (mode === 'both') {
+    ws.classList.remove('single-col');
+    pClient.style.display = 'block';
+    pAdmin.style.display = 'block';
+  } else if (mode === 'client') {
+    ws.classList.add('single-col');
+    pClient.style.display = 'block';
+    pAdmin.style.display = 'none';
+  } else {
+    ws.classList.add('single-col');
+    pClient.style.display = 'none';
+    pAdmin.style.display = 'block';
+  }
+}
+
+function changeExp(exp) {
+  currentExp = exp;
+  ['boxes', 'omakase', 'catering'].forEach(k => {
+    document.getElementById('mc-' + k).classList.toggle('active', k === exp);
+  });
+  const firstOpen = DATA[exp].slots.find(s => s.open && s.used < s.max) || DATA[exp].slots[0];
+  currentSlotId = firstOpen.id;
+  renderView();
+}
+
+function pickDay(day, btn) {
+  currentDay = day;
+  document.querySelectorAll('.day-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderView();
+}
+
+function pickSlot(id) {
+  const s = DATA[currentExp].slots.find(x => x.id === id);
+  if (!s || !s.open || s.used >= s.max) return;
+  currentSlotId = id;
+  renderView();
+}
+
+function changeQty(idx, delta) {
+  const item = DATA[currentExp].items[idx];
+  item.qty = Math.max(0, item.qty + delta);
+  renderView();
+}
+
+function toggleSlotOpen(id) {
+  const s = DATA[currentExp].slots.find(x => x.id === id);
+  if (!s) return;
+  s.open = !s.open;
+  renderView();
+}
+
+function renderView() {
+  const exp = DATA[currentExp];
+
+  // 1. Horas en el lado Cliente
+  document.getElementById('clientTimeGrid').innerHTML = exp.slots.map(s => {
+    const free = Math.max(0, s.max - s.used);
+    const isAvail = s.open && free > 0;
+    const isSel = isAvail && s.id === currentSlotId;
+    return `
+      <div class="time-card ${isSel ? 'selected' : ''} ${!isAvail ? 'closed' : ''}" onclick="pickSlot('${s.id}')">
+        <strong style="font-size:14.5px;color:var(--purple-dark);">${s.time}</strong>
+        <span style="font-size:11px;font-weight:800;color:${isAvail ? '#15803d' : '#991b1b'};">
+          ${isAvail ? `🟢 Quedan ${free} ${exp.unit}` : '⚪ Completo'}
+        </span>
+      </div>
+    `;
+  }).join('');
+
+  // 2. Unidades en el lado Cliente
+  let totalEur = 0;
+  document.getElementById('clientItemsList').innerHTML = exp.items.map((item, idx) => {
+    totalEur += item.price * item.qty;
+    return `
+      <div class="item-row">
+        <div>
+          <strong style="font-size:13.5px;color:var(--purple-dark);">${item.name}</strong>
+          <div style="font-size:12px;color:var(--fuchsia);font-weight:700;">${item.price.toFixed(2).replace('.', ',')} €</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
+          <strong style="min-width:18px;text-align:center;">${item.qty}</strong>
+          <button class="qty-btn plus" onclick="changeQty(${idx}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const selSlot = exp.slots.find(s => s.id === currentSlotId) || exp.slots[0];
+  document.getElementById('cSummaryLabel').textContent = `${currentDay} · ${selSlot.time}`;
+  document.getElementById('cTotalLabel').innerHTML = `${totalEur.toFixed(2).replace('.', ',')} € <span style="font-size:11px;font-weight:500;opacity:0.85;">(0% comisión)</span>`;
+
+  // 3. Semáforo de Turnos en el lado Restaurante
+  document.getElementById('adminSlotsGrid').innerHTML = exp.slots.map(s => {
+    const pct = Math.min(100, Math.round((s.used / s.max) * 100));
+    const isAvail = s.open && s.used < s.max;
+    return `
+      <div class="slot-control-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="font-size:15px;color:var(--purple-dark);">${s.time}</strong>
+          <button onclick="toggleSlotOpen('${s.id}')" style="padding:4px 10px;border-radius:99px;border:none;font-size:11px;font-weight:800;cursor:pointer;background:${isAvail ? '#dcfce7' : '#fee2e2'};color:${isAvail ? '#14532d' : '#991b1b'};">
+            ${isAvail ? '🟢 Abierto (Cerrar)' : '🔴 Cerrado (Abrir)'}
+          </button>
+        </div>
+        <div class="progress-bg"><div class="progress-fill" style="width:${pct}%;"></div></div>
+        <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;">
+          <span>Ocupado: <strong>${s.used} / ${s.max}</strong> ${exp.unit}</span>
+          <span>${100 - pct}% libre</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // 4. Lista visual de Reservas en el lado Restaurante
+  document.getElementById('adminBookingsList').innerHTML = recentBookings.map(b => `
+    <div class="booking-card">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--fuchsia);">${b.code} · ${b.time}</div>
+        <strong style="font-size:14px;color:var(--purple-dark);">${b.client}</strong>
+        <div style="font-size:12.5px;color:var(--muted);">${b.summary}</div>
+        <span style="display:inline-block;margin-top:4px;font-size:11px;background:#fff;padding:2px 8px;border-radius:6px;border:1px solid var(--line);font-weight:700;">${b.allergy}</span>
+      </div>
+      <div style="text-align:right;">
+        <strong style="font-size:16px;color:var(--purple-dark);display:block;margin-bottom:6px;">${b.total}</strong>
+        <a href="04_Cabina_Operativa_Pedidos_y_Lanzamiento_Tsukihana.html" style="font-size:11px;font-weight:800;color:var(--purple-mid);text-decoration:none;">Ver en Cabina →</a>
+      </div>
+    </div>
+  `).join('');
+
+  // 5. Barras visuales de Stock en Nevera
+  document.getElementById('adminStockBars').innerHTML = Object.values(stockState).map(st => {
+    const pct = Math.min(100, Math.round((st.val / st.max) * 100));
+    return `
+      <div class="stock-mini-card">
+        <div style="display:flex;justify-content:space-between;font-weight:700;">
+          <span>${st.name}</span>
+          <span style="color:var(--fuchsia);">${st.val} g</span>
+        </div>
+        <div class="progress-bg"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function confirmBooking() {
+  const exp = DATA[currentExp];
+  const slot = exp.slots.find(s => s.id === currentSlotId);
+  const chosen = exp.items.filter(i => i.qty > 0);
+  if (!slot || !slot.open || slot.used >= slot.max) {
+    alert('Por favor, elige un turno que esté abierto.');
+    return;
+  }
+  if (chosen.length === 0) {
+    alert('Añade al menos 1 unidad con el botón +.');
+    return;
+  }
+
+  let quotaAdd = 0;
+  let totalEur = 0;
+  const parts = [];
+
+  chosen.forEach(i => {
+    quotaAdd += i.quota * i.qty;
+    totalEur += i.price * i.qty;
+    parts.push(`${i.qty}x ${i.name}`);
+    Object.entries(i.grams).forEach(([k, g]) => {
+      if (stockState[k]) stockState[k].val = Math.max(0, stockState[k].val - (g * i.qty));
+    });
+  });
+
+  slot.used = Math.min(slot.max, slot.used + quotaAdd);
+  if (slot.used >= slot.max) slot.open = false;
+
+  const client = document.getElementById('cName').value.trim() || 'Cliente Vigo';
+  const allergy = document.getElementById('cAllergy').value;
+  const code = 'RES-' + Math.floor(100 + Math.random() * 900);
+
+  recentBookings.unshift({
+    code: code,
+    client: client,
+    time: `${currentDay} · ${slot.time}`,
+    summary: parts.join(' + '),
+    allergy: allergy,
+    total: totalEur.toFixed(2).replace('.', ',') + ' €'
+  });
+
+  renderView();
+}
+
+renderView();
+</script>
+</body>
+</html>
